@@ -11,9 +11,11 @@ namespace OpenUtau.App.Controls {
         public NotePropertyExpression() {
             InitializeComponent();
             
-            slider.AddHandler(PointerPressedEvent, SliderPointerPressed, RoutingStrategies.Tunnel);
-            slider.AddHandler(PointerReleasedEvent, SliderPointerReleased, RoutingStrategies.Tunnel);
-            slider.AddHandler(PointerMovedEvent, SliderPointerMoved, RoutingStrategies.Tunnel);
+            slider.InnerSlider.AddHandler(PointerPressedEvent, SliderPointerPressed, RoutingStrategies.Tunnel);
+            slider.InnerSlider.AddHandler(PointerReleasedEvent, SliderPointerReleased, RoutingStrategies.Tunnel);
+            slider.InnerSlider.AddHandler(PointerMovedEvent, SliderPointerMoved, RoutingStrategies.Tunnel);
+            slider.InnerEditor.AddHandler(GotFocusEvent, OnTextBoxGotFocus);
+            slider.InnerEditor.AddHandler(LostFocusEvent, OnTextBoxLostFocus);
             comboBox.AddHandler(PointerPressedEvent, OnComboBoxPointerPressed, RoutingStrategies.Tunnel);
         }
 
@@ -48,16 +50,16 @@ namespace OpenUtau.App.Controls {
         void SliderPointerReleased(object? sender, PointerReleasedEventArgs args) {
             Log.Debug("Note property slider released");
             if (NotePropertiesViewModel.PanelControlPressed) {
-                if (sender is Slider slider && DataContext is NotePropertyExpViewModel ViewModel) {
-                    ViewModel.SetNumericalExpressions((float)slider.Value);
+                if (sender is Slider inner && DataContext is NotePropertyExpViewModel ViewModel) {
+                    ViewModel.SetNumericalExpressions((float)inner.Value);
                 }
                 NotePropertiesViewModel.PanelControlPressed = false;
                 DocManager.Inst.EndUndoGroup();
             }
         }
         void SliderPointerMoved(object? sender, PointerEventArgs args) {
-            if (sender is Slider slider && DataContext is NotePropertyExpViewModel ViewModel) {
-                ViewModel.SetNumericalExpressions((float)slider.Value);
+            if (sender is Slider inner && DataContext is NotePropertyExpViewModel ViewModel) {
+                ViewModel.SetNumericalExpressions((float)inner.Value);
             }
         }
 

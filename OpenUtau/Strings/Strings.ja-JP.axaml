@@ -392,9 +392,14 @@ Do you want to continue by splitting at the nearest position after current playh
   <system:String x:Key="notedefaults.vibrato.vollink">音量の連動</system:String>
 
   <system:String x:Key="noteproperty">音符のプロパティ</system:String>
+  <!--<system:String x:Key="noteproperty.attack">Attack (ms)</system:String>-->
   <system:String x:Key="noteproperty.basic">基本</system:String>
+  <!--<system:String x:Key="noteproperty.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="noteproperty.overlap">Overlap (ms)</system:String>-->
   <!--<system:String x:Key="noteproperty.parent.phonemizer">Follows Parent Phonemizer</system:String>-->
   <!--<system:String x:Key="noteproperty.phonemizer">Phonemizer</system:String>-->
+  <!--<system:String x:Key="noteproperty.pre">Pre-utterance (ms)</system:String>-->
+  <!--<system:String x:Key="noteproperty.release">Release (ms)</system:String>-->
   <system:String x:Key="noteproperty.set">セット</system:String>
   <system:String x:Key="noteproperty.setlongnote">長い音符のみセットする</system:String>
   <system:String x:Key="noteproperty.tone">音程</system:String>

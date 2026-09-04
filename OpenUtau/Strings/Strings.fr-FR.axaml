@@ -393,9 +393,14 @@ Attention : cela va effacer les préréglages.</system:String>
   <system:String x:Key="notedefaults.vibrato.vollink">Lier au volume</system:String>
 
   <system:String x:Key="noteproperty">Propriétés des notes</system:String>
+  <!--<system:String x:Key="noteproperty.attack">Attack (ms)</system:String>-->
   <system:String x:Key="noteproperty.basic">Base</system:String>
+  <!--<system:String x:Key="noteproperty.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="noteproperty.overlap">Overlap (ms)</system:String>-->
   <!--<system:String x:Key="noteproperty.parent.phonemizer">Follows Parent Phonemizer</system:String>-->
   <!--<system:String x:Key="noteproperty.phonemizer">Phonemizer</system:String>-->
+  <!--<system:String x:Key="noteproperty.pre">Pre-utterance (ms)</system:String>-->
+  <!--<system:String x:Key="noteproperty.release">Release (ms)</system:String>-->
   <system:String x:Key="noteproperty.set">Assigner</system:String>
   <system:String x:Key="noteproperty.setlongnote">Assigner seulement sur les notes longues</system:String>
   <system:String x:Key="noteproperty.tone">Tonalité</system:String>

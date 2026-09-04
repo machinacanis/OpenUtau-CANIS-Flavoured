@@ -200,7 +200,8 @@ namespace OpenUtau.Core.Editing {
             foreach (var note in notes) {
                 bool shouldClear = false;
                 foreach (var o in note.phonemeOverrides) {
-                    if (o.offset != null || o.preutterDelta != null || o.overlapDelta != null) {
+                    if (o.offset != null || o.preutterDelta != null || o.overlapDelta != null
+                        || o.attackTimeDelta != null || o.releaseTimeDelta != null) {
                         shouldClear = true;
                         break;
                     }
@@ -262,7 +263,8 @@ namespace OpenUtau.Core.Editing {
                 // timings
                 bool shouldClear = false;
                 foreach (var o in note.phonemeOverrides) {
-                    if (o.offset != null || o.preutterDelta != null || o.overlapDelta != null) {
+                    if (o.offset != null || o.preutterDelta != null || o.overlapDelta != null
+                        || o.attackTimeDelta != null || o.releaseTimeDelta != null) {
                         shouldClear = true;
                         break;
                     }

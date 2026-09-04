@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
+using Avalonia.VisualTree;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
@@ -29,6 +30,10 @@ foreach (var box in this.GetLogicalDescendants().OfType<TextBox>()) {
                   slider.AddHandler(PointerPressedEvent, SliderPointerPressed, RoutingStrategies.Tunnel);
                   slider.AddHandler(PointerReleasedEvent, SliderPointerReleased, RoutingStrategies.Tunnel);
                   slider.AddHandler(PointerMovedEvent, SliderPointerMoved, RoutingStrategies.Tunnel);
+              }
+              foreach (var editor in this.GetLogicalDescendants().OfType<UnboundedSlider>()) {
+                  editor.InnerEditor.AddHandler(GotFocusEvent, OnSliderEditorGotFocus);
+                  editor.InnerEditor.AddHandler(LostFocusEvent, OnSliderEditorLostFocus);
               }
           
             MessageBus.Current.Listen<PianorollRefreshEvent>()
@@ -107,6 +112,25 @@ foreach (var box in this.GetLogicalDescendants().OfType<TextBox>()) {
         void SliderPointerMoved(object? sender, PointerEventArgs args) {
             if (sender is Slider slider && slider.Tag is string tag && !string.IsNullOrEmpty(tag)) {
                 ViewModel.SetNoteParams(tag, (float)slider.Value);
+            }
+        }
+
+        void OnSliderEditorGotFocus(object? sender, FocusChangedEventArgs args) {
+            if (sender is TextBox) {
+                textBoxValue = ((TextBox)sender).Text ?? string.Empty;
+            }
+        }
+        void OnSliderEditorLostFocus(object? sender, FocusChangedEventArgs args) {
+            if (sender is TextBox textBox &&
+                textBox.FindAncestorOfType<UnboundedSlider>() is UnboundedSlider slider &&
+                slider.Tag is string tag &&
+                !string.IsNullOrEmpty(tag) &&
+                textBoxValue != textBox.Text) {
+                DocManager.Inst.StartUndoGroup("command.property.edit");
+                NotePropertiesViewModel.PanelControlPressed = true;
+                ViewModel.SetNoteParams(tag, (float)slider.Value);
+                NotePropertiesViewModel.PanelControlPressed = false;
+                DocManager.Inst.EndUndoGroup();
             }
         }
 

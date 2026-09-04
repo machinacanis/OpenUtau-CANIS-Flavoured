@@ -392,9 +392,14 @@
   <system:String x:Key="notedefaults.vibrato.vollink">音量关联</system:String>
 
   <system:String x:Key="noteproperty">音符属性</system:String>
+  <system:String x:Key="noteproperty.attack">起音 (ms)</system:String>
   <system:String x:Key="noteproperty.basic">基本属性</system:String>
+  <system:String x:Key="noteproperty.cancel">取消</system:String>
+  <system:String x:Key="noteproperty.overlap">重叠 (ms)</system:String>
   <system:String x:Key="noteproperty.parent.phonemizer">跟随父级音素化器</system:String>
   <system:String x:Key="noteproperty.phonemizer">音素化器</system:String>
+  <system:String x:Key="noteproperty.pre">前发音 (ms)</system:String>
+  <system:String x:Key="noteproperty.release">释音 (ms)</system:String>
   <system:String x:Key="noteproperty.set">设置</system:String>
   <system:String x:Key="noteproperty.setlongnote">仅应用于长音符</system:String>
   <system:String x:Key="noteproperty.tone">音高</system:String>

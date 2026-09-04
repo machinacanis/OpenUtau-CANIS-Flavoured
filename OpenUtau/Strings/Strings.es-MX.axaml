@@ -392,9 +392,14 @@ Advertencia: Esta opción eliminará las bases personalizadas.</system:String>
   <system:String x:Key="notedefaults.vibrato.vollink">Defase volumetrico</system:String>
 
   <system:String x:Key="noteproperty">Propiedades de nota</system:String>
+  <!--<system:String x:Key="noteproperty.attack">Attack (ms)</system:String>-->
   <system:String x:Key="noteproperty.basic">Base</system:String>
+  <!--<system:String x:Key="noteproperty.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="noteproperty.overlap">Overlap (ms)</system:String>-->
   <!--<system:String x:Key="noteproperty.parent.phonemizer">Follows Parent Phonemizer</system:String>-->
   <!--<system:String x:Key="noteproperty.phonemizer">Phonemizer</system:String>-->
+  <!--<system:String x:Key="noteproperty.pre">Pre-utterance (ms)</system:String>-->
+  <!--<system:String x:Key="noteproperty.release">Release (ms)</system:String>-->
   <system:String x:Key="noteproperty.set">Aplicar</system:String>
   <system:String x:Key="noteproperty.setlongnote">Aplicar solo en notas largas</system:String>
   <system:String x:Key="noteproperty.tone">Tono</system:String>
