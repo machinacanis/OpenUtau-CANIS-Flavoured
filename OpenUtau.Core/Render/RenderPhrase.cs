@@ -496,9 +496,7 @@ namespace OpenUtau.Core.Render {
                         }
                         break;
                     case Format.Ustx.LOWC: lowcut = curveSampled; break;
-                    case Format.Ustx.WARM:
-                        if (!curve.IsEmpty) { warmth = curveSampled; }
-                        break;
+                    case Format.Ustx.WARM: warmth = curveSampled; break;
                     case Format.Ustx.HCMP: hcmp = curveSampled; break;
                     case Format.Ustx.BREL: breathLow = curveSampled; break;
                     case Format.Ustx.BREH: breathHigh = curveSampled; break;

@@ -18,7 +18,10 @@ namespace OpenUtau.Core.HiFiUtau.Engine.Pipeline {
         // 同一音源文件会被多个音素重复读取，缓存解码结果
         private static readonly ConcurrentDictionary<string, float[]> Cache = new();
 
-        public static void ClearCache() => Cache.Clear();
+        public static void ClearCache() {
+            Cache.Clear();
+            audioSampleRates.Clear();
+        }
 
         public static float[] Read(string path, int targetSr = 44100) {
             if (!File.Exists(path)) {
@@ -27,7 +30,7 @@ namespace OpenUtau.Core.HiFiUtau.Engine.Pipeline {
             var audio = Cache.GetOrAdd(path, p => Decode(p));
             if (audio.Length == 0) return Array.Empty<float>();
             // 采样率不匹配时重采样（librosa.resample 语义；用 WdlResampler 实现）
-            if (targetSr > 0 &&audioSampleRates.TryGetValue(path, out int fs) && fs != targetSr) {
+            if (targetSr > 0 && audioSampleRates.TryGetValue(path, out int fs) && fs != targetSr) {
                 return Resample(audio, fs, targetSr);
             }
             return audio;
@@ -67,14 +70,20 @@ namespace OpenUtau.Core.HiFiUtau.Engine.Pipeline {
 
         private sealed class FloatArraySampleProvider : ISampleProvider {
             private readonly float[] data;
+            private int position;
             public WaveFormat WaveFormat { get; }
             public FloatArraySampleProvider(float[] data, int sr) {
                 this.data = data;
                 WaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sr, 1);
             }
             public int Read(float[] buffer, int offset, int count) {
-                int n = Math.Min(count, data.Length);
-                Array.Copy(data, 0, buffer, offset, n);
+                int remaining = data.Length - position;
+                if (remaining <= 0) {
+                    return 0;
+                }
+                int n = Math.Min(count, remaining);
+                Array.Copy(data, position, buffer, offset, n);
+                position += n;
                 return n;
             }
         }
