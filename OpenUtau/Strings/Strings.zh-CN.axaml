@@ -135,8 +135,10 @@
 是否改为在播放头之后最近的无音符位置进行拆分？</system:String>
   <system:String x:Key="dialogs.timesig.caption">拍号</system:String>
   <system:String x:Key="dialogs.tracksettings.caption">音轨设置</system:String>
+  <system:String x:Key="dialogs.tracksettings.endpoint">端点</system:String>
   <system:String x:Key="dialogs.tracksettings.location">位置</system:String>
   <system:String x:Key="dialogs.tracksettings.renderer">渲染器</system:String>
+  <system:String x:Key="dialogs.tracksettings.serverurl">服务器地址</system:String>
   <system:String x:Key="dialogs.tracksettings.setasdefault">设为默认</system:String>
   <system:String x:Key="dialogs.transcribe.allnotfound">当前未安装任何音频转写模型。请通过包管理器安装 GAME，或从此处手动下载：{0}</system:String>
   <system:String x:Key="dialogs.transcribe.caption">音频转写</system:String>
@@ -198,6 +200,8 @@
   <system:String x:Key="errors.failed.synth.cutoffexceedduration">Oto 错误：cutoff 超出音频长度</system:String>
   <system:String x:Key="errors.failed.transcribe.rmvpe">加载 RMVPE ONNX 模型失败。请从插件管理器安装，或将 rmvpe.onnx 放到 {0}</system:String>
   <system:String x:Key="errors.failed.transcribe.some">加载 SOME 模型失败。请从此处下载：{0}</system:String>
+  <system:String x:Key="errors.hifiutau.disabled">HiFiUTAU 内嵌引擎已在 偏好设置 > HiFiUTAU 中禁用。</system:String>
+  <system:String x:Key="errors.hifiutau.nomodels">未找到 HiFiUTAU 模型。请在包管理器安装 pc_nsf_hifigan_44.1k_hop512_128bin_2025.02 和 hnsep_VR_44.1k_hop512_2024.05。不要使用 PyTorch 的 model.ckpt 压缩包。</system:String>
   <system:String x:Key="errors.install.cpp">请安装最新的 Visual C++ 运行环境。 https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170</system:String>
   <system:String x:Key="errors.lyrics.regex">正则表达式包含不支持的字符</system:String>
   <system:String x:Key="errors.lyrics.regexpreview">- 正则表达式错误 -</system:String>
@@ -663,6 +667,29 @@
   <!--<system:String x:Key="prefs.diffsinger">DiffSinger</system:String>-->
   <system:String x:Key="prefs.editing">编辑</system:String>
   <system:String x:Key="prefs.general">常规</system:String>
+  <system:String x:Key="prefs.hifiutau.customserver">Custom Server 后端地址</system:String>
+  <system:String x:Key="prefs.hifiutau.customserver.hint">"Custom Server" 渲染器使用的默认服务器地址（如 http://localhost:8000）。未单独设置地址的曲目使用此值。</system:String>
+  <system:String x:Key="prefs.hifiutau.embedded">使用内嵌引擎（进程内 ONNX 推理）</system:String>
+  <system:String x:Key="prefs.hifiutau.hnseppath">HN-SEP 覆盖路径（留空则使用包管理器中的 hnsep_VR_44.1k_hop512_2024.05）。目录须含 oudep.yaml 和 HN-SEP ONNX。</system:String>
+  <system:String x:Key="prefs.hifiutau.preload">启动时预热引擎</system:String>
+  <system:String x:Key="prefs.hifiutau.preload.hint">编辑器启动时在后台加载模型，避免首次渲染卡顿。重启应用后生效。</system:String>
+  <system:String x:Key="prefs.hifiutau.reload">重载引擎</system:String>
+  <system:String x:Key="prefs.hifiutau.reload.all">全部</system:String>
+  <system:String x:Key="prefs.hifiutau.reload.hint">应用模型目录/线程数变更，并清空渲染缓存。</system:String>
+  <system:String x:Key="prefs.hifiutau.reload.hnsep">分离</system:String>
+  <system:String x:Key="prefs.hifiutau.reload.splicer">拼接</system:String>
+  <system:String x:Key="prefs.hifiutau.splicerpath">声码器覆盖路径（留空则使用包管理器中的 pc_nsf_hifigan_44.1k_hop512_128bin_2025.02）。目录须含 vocoder.yaml 及其指向的 ONNX，不是 model.ckpt。</system:String>
+  <system:String x:Key="prefs.hifiutau.status.format">模式：{0}
+拼接模型：{1}（{2}）
+分离模型：{3}（{4}）</system:String>
+  <system:String x:Key="prefs.hifiutau.status.mode.disabled">已禁用</system:String>
+  <system:String x:Key="prefs.hifiutau.status.mode.embedded">内嵌</system:String>
+  <system:String x:Key="prefs.hifiutau.status.notfound">未找到</system:String>
+  <system:String x:Key="prefs.hifiutau.status.notloaded">未加载</system:String>
+  <system:String x:Key="prefs.hifiutau.status.ready">已加载</system:String>
+  <system:String x:Key="prefs.hifiutau.threads">ONNX 推理线程数（单次推理）</system:String>
+  <system:String x:Key="prefs.hifiutau.threads.hint">0 = 自动。限制单次推理的 CPU 占用；重载引擎后生效。</system:String>
+  <!--<system:String x:Key="prefs.hifiutau.title">HiFiUTAU</system:String>-->
   <system:String x:Key="prefs.note.restart">注意: 修改本项后请重启OpenUtau</system:String>
   <system:String x:Key="prefs.otoeditor">原音设定编辑器</system:String>
   <system:String x:Key="prefs.otoeditor.select">默认原音设定编辑器</system:String>

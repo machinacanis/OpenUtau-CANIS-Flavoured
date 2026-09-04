@@ -135,8 +135,10 @@
 Do you want to continue by splitting at the nearest position after current playhead with no notes in the way?</system:String>-->
   <system:String x:Key="dialogs.timesig.caption">Tanda Waktu</system:String>
   <system:String x:Key="dialogs.tracksettings.caption">Pengaturan Trek</system:String>
+  <!--<system:String x:Key="dialogs.tracksettings.endpoint">Endpoint</system:String>-->
   <system:String x:Key="dialogs.tracksettings.location">Lokasi</system:String>
   <system:String x:Key="dialogs.tracksettings.renderer">Perender</system:String>
+  <!--<system:String x:Key="dialogs.tracksettings.serverurl">Server URL</system:String>-->
   <system:String x:Key="dialogs.tracksettings.setasdefault">Tetapkan Sebagai Bawaan</system:String>
   <!--<system:String x:Key="dialogs.transcribe.allnotfound">No transcription models are installed. Please install GAME via the Package Manager or download manually from {0}.</system:String>-->
   <!--<system:String x:Key="dialogs.transcribe.caption">Transcribe Audio</system:String>-->
@@ -198,6 +200,8 @@ Do you want to continue by splitting at the nearest position after current playh
   <!--<system:String x:Key="errors.failed.synth.cutoffexceedduration">Oto error: cutoff exceeds audio duration</system:String>-->
   <!--<system:String x:Key="errors.failed.transcribe.rmvpe">Error loading RMVPE ONNX model. Install it from the Package Manager, or put rmvpe.onnx in {0}</system:String>-->
   <!--<system:String x:Key="errors.failed.transcribe.some">Error loading SOME. Please download SOME from {0}</system:String>-->
+  <!--<system:String x:Key="errors.hifiutau.disabled">The HiFiUTAU embedded engine is disabled in Preferences > HiFiUTAU.</system:String>-->
+  <!--<system:String x:Key="errors.hifiutau.nomodels">HiFiUTAU models not found. Install pc_nsf_hifigan_44.1k_hop512_128bin_2025.02 and hnsep_VR_44.1k_hop512_2024.05 from the Package Manager. Do not use the PyTorch model.ckpt zip.</system:String>-->
   <!--<system:String x:Key="errors.install.cpp">Try installing the latest Visual C++ Redistributable. https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170</system:String>-->
   <!--<system:String x:Key="errors.lyrics.regex">Character not allowed in regular expression</system:String>-->
   <!--<system:String x:Key="errors.lyrics.regexpreview">- regular expression error -</system:String>-->
@@ -667,6 +671,29 @@ Peringatan: opsi ini menghapus prasetel khusus.</system:String>
   <!--<system:String x:Key="prefs.diffsinger">DiffSinger</system:String>-->
   <!--<system:String x:Key="prefs.editing">Editing</system:String>-->
   <!--<system:String x:Key="prefs.general">General</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.customserver">Custom Server backend address</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.customserver.hint">Default server URL used by the Custom Server renderer (e.g. http://localhost:8000). New tracks without an explicit URL use this value.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.embedded">Use embedded engine (in-process ONNX inference)</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.hnseppath">HN-SEP override (empty = Package Manager hnsep_VR_44.1k_hop512_2024.05). Directory must contain oudep.yaml and the HN-SEP ONNX.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.preload">Preload engine on startup</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.preload.hint">Loads models in the background while the editor starts. Takes effect on next launch.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload">Reload engine</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload.all">All</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload.hint">Applies model directory / thread changes and clears the render cache.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload.hnsep">HN-SEP</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload.splicer">Splicer</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.splicerpath">Vocoder override (empty = Package Manager pc_nsf_hifigan_44.1k_hop512_128bin_2025.02). Directory must contain vocoder.yaml and the ONNX named in it, not model.ckpt.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.format">Mode: {0}
+Splicer model: {1} ({2})
+HN-SEP model: {3} ({4})</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.mode.disabled">Disabled</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.mode.embedded">Embedded</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.notfound">not found</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.notloaded">not loaded</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.ready">loaded</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.threads">ONNX inference threads (per call)</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.threads.hint">0 = automatic. Limits CPU usage per inference; applied after reloading the engine.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.title">HiFiUTAU</system:String>-->
   <system:String x:Key="prefs.note.restart">Catatan: silakan restart OpenUtau setelah mengubah item ini.</system:String>
   <system:String x:Key="prefs.otoeditor">Pengedit Oto</system:String>
   <system:String x:Key="prefs.otoeditor.select">Pengedit Oto Bawaan</system:String>
