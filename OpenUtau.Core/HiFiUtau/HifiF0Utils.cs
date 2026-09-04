@@ -1,0 +1,279 @@
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using OpenUtau.Core.Render;
+using OpenUtau.Core.Ustx;
+using OpenUtau.Core.Util;
+
+namespace OpenUtau.Core.HiFiUtau {
+    /// <summary>
+    /// 曲线采样工具（由原 CustomRender.CustomF0Utils 迁移，独立于 CustomRenderer）。
+    /// </summary>
+    public static class HifiF0Utils {
+        private const int Interval = 5;
+
+        /// <summary>
+        /// OpenUtau 标准曲线的默认值映射表（abbr -> defaultValue）。
+        /// 对应 Format.Ustx.AddDefaultExpressions 中的配置。
+        /// 注意：dyn（动态曲线）和 shfc（音高偏移曲线）不作为公共字段暴露，
+        /// 需要通过 RenderPhrase.curves 或修改 RenderPhrase 访问。
+        /// </summary>
+        private static readonly Dictionary<string, double> CurveDefaults = new Dictionary<string, double> {
+            { "genc", 0 },
+            { "brec", 0 },
+            { "tenc", 0 },
+            { "voic", 100 },
+            { "lowc", 0 },
+            { "hcmp", 0 },
+            { "brel", 0 },
+            { "breh", 0 },
+        };
+
+        /// <summary>
+        /// 自动发现 RenderPhrase 中所有曲线并采样到目标帧率。
+        /// 返回字典（abbr -> double[]），包含所有标准曲线和自定义曲线。
+        /// </summary>
+        public static Dictionary<string, double[]> SampleAllCurves(
+            RenderPhrase phrase,
+            double frameMs,
+            int totalFrames) {
+            var result = new Dictionary<string, double[]>();
+
+            // 定义标准曲线映射：abbr -> (hasData函数, 采样函数)
+            // 注意：dyn（动态曲线）和 shfc（音高偏移曲线）存储在 RenderPhrase 内部，
+            // 不作为公共字段暴露，因此无法在此采样。
+            // 若需要它们，可在 RenderPhrase 中添加公共访问器。
+            var standardCurves = new (string abbr, Func<bool> hasData, Func<int, double> sample)[] {
+                ("pitd",
+                    () => phrase.pitches != null && phrase.pitches.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        int idx = ClampIndex(ticks, phrase.pitches!.Length);
+                        return MusicMath.ToneToFreq(phrase.pitches[idx] * 0.01);
+                    }),
+                ("genc",
+                    () => phrase.gender != null && phrase.gender.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.gender![ClampIndex(ticks, phrase.gender.Length)];
+                    }),
+                ("brec",
+                    () => phrase.breathiness != null && phrase.breathiness.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.breathiness![ClampIndex(ticks, phrase.breathiness.Length)];
+                    }),
+                ("tenc",
+                    () => phrase.tension != null && phrase.tension.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.tension![ClampIndex(ticks, phrase.tension.Length)];
+                    }),
+                ("voic",
+                    () => phrase.voicing != null && phrase.voicing.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.voicing![ClampIndex(ticks, phrase.voicing.Length)];
+                    }),
+                ("lowc",
+                    () => phrase.lowcut != null && phrase.lowcut.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.lowcut![ClampIndex(ticks, phrase.lowcut.Length)];
+                    }),
+                ("warm",
+                    () => phrase.warmth != null && phrase.warmth.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.warmth![ClampIndex(ticks, phrase.warmth.Length)];
+                    }),
+                ("hcmp",
+                    () => phrase.hcmp != null && phrase.hcmp.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.hcmp![ClampIndex(ticks, phrase.hcmp.Length)];
+                    }),
+                ("brel",
+                    () => phrase.breathLow != null && phrase.breathLow.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.breathLow![ClampIndex(ticks, phrase.breathLow.Length)];
+                    }),
+                ("breh",
+                    () => phrase.breathHigh != null && phrase.breathHigh.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.breathHigh![ClampIndex(ticks, phrase.breathHigh.Length)];
+                    }),
+            };
+
+            // 采样所有标准曲线
+            foreach (var (abbr, hasData, sample) in standardCurves) {
+                if (!hasData()) {
+                    continue;
+                }
+                var curve = new double[totalFrames];
+                for (int i = 0; i < totalFrames; i++) {
+                    curve[i] = sample(i);
+                }
+                result[abbr] = curve;
+            }
+
+            // 采样自定义曲线（由 renderer 自定义的额外曲线）
+            if (phrase.curves != null) {
+                foreach (var tuple in phrase.curves) {
+                    if (tuple.Item2 == null || tuple.Item2.Length == 0) {
+                        continue;
+                    }
+                    var curve = new double[totalFrames];
+                    for (int i = 0; i < totalFrames; i++) {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        curve[i] = tuple.Item2[ClampIndex(ticks, tuple.Item2.Length)];
+                    }
+                    result[tuple.Item1] = curve;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 为指定音素范围内的曲线采样。
+        /// 返回字典（abbr -> double[]），长度为该音素内的帧数。
+        /// </summary>
+        public static Dictionary<string, double[]> SampleCurvesForPhoneme(
+            RenderPhrase phrase,
+            RenderPhone phone,
+            int phoneIndex,
+            double frameMs,
+            int totalFrames) {
+            var result = new Dictionary<string, double[]>();
+
+            // 计算该音素在全局帧范围内的起始和结束帧索引
+            // phrase 的第 0 帧对应绝对时间 (phrase.positionMs - phrase.leadingMs)
+            double phraseBaseMs = phrase.positionMs - phrase.leadingMs;
+            double phoneStartMs = phone.positionMs - phone.leadingMs;
+            double phoneEndMs = phone.endMs;
+
+            int startFrame = Math.Max(0, (int)((phoneStartMs - phraseBaseMs) / frameMs));
+            int endFrame = Math.Min(totalFrames, (int)Math.Ceiling((phoneEndMs - phraseBaseMs) / frameMs));
+            int phoneFrames = Math.Max(1, endFrame - startFrame);
+
+            // 标准曲线（逐音素只保留 genc，其他曲线在全局层面传递）
+            var standardCurves = new (string abbr, Func<bool> hasData, Func<int, double> sample)[] {
+                ("genc",
+                    () => phrase.gender != null && phrase.gender.Length > 0,
+                    i => {
+                        int ticks = GetTicks(phrase, i, frameMs);
+                        return phrase.gender![ClampIndex(ticks, phrase.gender.Length)];
+                    }),
+            };
+
+            foreach (var (abbr, hasData, sample) in standardCurves) {
+                if (!hasData()) {
+                    continue;
+                }
+                var curve = new double[phoneFrames];
+                for (int i = 0; i < phoneFrames; i++) {
+                    int globalIdx = startFrame + i;
+                    if (globalIdx < totalFrames) {
+                        curve[i] = sample(globalIdx);
+                    } else {
+                        curve[i] = sample(totalFrames - 1);
+                    }
+                }
+                result[abbr] = curve;
+            }
+
+            // 自定义曲线
+            if (phrase.curves != null) {
+                foreach (var tuple in phrase.curves) {
+                    if (tuple.Item2 == null || tuple.Item2.Length == 0) {
+                        continue;
+                    }
+                    var curve = new double[phoneFrames];
+                    for (int i = 0; i < phoneFrames; i++) {
+                        int globalIdx = startFrame + i;
+                        if (globalIdx < totalFrames) {
+                            int ticks = GetTicks(phrase, globalIdx, frameMs);
+                            curve[i] = tuple.Item2[ClampIndex(ticks, tuple.Item2.Length)];
+                        } else {
+                            int ticks = GetTicks(phrase, totalFrames - 1, frameMs);
+                            curve[i] = tuple.Item2[ClampIndex(ticks, tuple.Item2.Length)];
+                        }
+                    }
+                    result[tuple.Item1] = curve;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 判断单条曲线是否全部为默认值。
+        /// pitd（音高偏差）永远视为有用，始终返回 false。
+        /// 未知曲线回退默认值 0。
+        /// </summary>
+        public static bool IsCurveDefault(string abbr, double[] curve) {
+            if (abbr == "pitd") {
+                return false; // pitd 永远有用
+            }
+            if (curve == null || curve.Length == 0) {
+                return true;
+            }
+            double defaultValue = CurveDefaults.TryGetValue(abbr, out var def) ? def : 0.0;
+            foreach (var v in curve) {
+                if (v != defaultValue) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 检查所有曲线是否均为默认值。
+        /// </summary>
+        public static bool AllCurvesDefault(Dictionary<string, double[]> curves) {
+            if (curves == null || curves.Count == 0) {
+                return true;
+            }
+            foreach (var kvp in curves) {
+                if (!IsCurveDefault(kvp.Key, kvp.Value)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetTicks(RenderPhrase phrase, int frameIndex, double frameMs) {
+            double posMs = GetFramePositionMs(phrase, frameIndex, frameMs);
+            double positionOffset = phrase.position - phrase.leading;
+            return (int)(phrase.timeAxis.MsPosToTickPos(posMs) - positionOffset);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int ClampIndex(int ticks, int length) {
+            return Math.Max(0, Math.Min(length - 1, ticks / Interval));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double GetFramePositionMs(RenderPhrase phrase, int frameIndex, double frameMs) {
+            double positionMs = phrase.positionMs + frameIndex * frameMs;
+
+            if (phrase.phones.Length == 0) {
+                return positionMs;
+            }
+
+            var firstPhone = phrase.phones[0];
+            if (firstPhone.envelope.Length >= 2) {
+                double preutter = -firstPhone.envelope[0].X;
+                if (preutter > 0) {
+                    return positionMs - preutter;
+                }
+            }
+
+            return positionMs;
+        }
+    }
+}

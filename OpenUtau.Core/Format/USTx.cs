@@ -36,6 +36,17 @@ namespace OpenUtau.Core.Format {
         public const string VOIC = "voic";
         public const string CLRY = "clry";
         public const string XSY = "xsy";
+        public const string GWL = "gwl";
+        public const string LOWC = "lowc";
+        public const string BREL = "brel";
+        public const string BREH = "breh";
+        public const string PHTP = "phtp";
+        public const string PHTD = "phtd";
+        public const string STRT = "strt";
+        public const string SPLC = "splc";
+        public const string STMS = "stms";
+        public const string WARM = "warm";
+        public const string HCMP = "hcmp";
 
         public static readonly string[] required = { DYN, PITD, CLR, ENG, VEL, VOL, ATK, DEC };
 
@@ -64,6 +75,16 @@ namespace OpenUtau.Core.Format {
             project.RegisterExpression(new UExpressionDescriptor("voicing (curve)", VOIC, 0, 100, 100) { type = UExpressionType.Curve });
             project.RegisterExpression(new UExpressionDescriptor("voice color y", CLRY, false, new string[0]));
             project.RegisterExpression(new UExpressionDescriptor("cross synthesis (curve)", XSY, 0, 100, 0) { type = UExpressionType.Curve });
+            project.RegisterExpression(new UExpressionDescriptor("growl (curve)", GWL, 0, 100, 0) { type = UExpressionType.Curve });
+            project.RegisterExpression(new UExpressionDescriptor("lowcut (curve)", LOWC, 0, 100, 0) { type = UExpressionType.Curve });
+            project.RegisterExpression(new UExpressionDescriptor("brightness (curve)", WARM, -100, 100, 0) { type = UExpressionType.Curve });
+            project.RegisterExpression(new UExpressionDescriptor("hard compression (curve)", HCMP, 0, 100, 0) { type = UExpressionType.Curve });
+            project.RegisterExpression(new UExpressionDescriptor("breath low (curve)", BREL, -100, 100, 0) { type = UExpressionType.Curve });
+            project.RegisterExpression(new UExpressionDescriptor("breath high (curve)", BREH, -100, 100, 0) { type = UExpressionType.Curve });
+            project.RegisterExpression(new UExpressionDescriptor("volume normalize", PHTP, false, new string[] { "none", "backward", "forward" }));
+            project.RegisterExpression(new UExpressionDescriptor("stretch mode", STRT, false, new string[] { "normal", "loop" }));
+            project.RegisterExpression(new UExpressionDescriptor("splice mode", SPLC, false, new string[] { "model", "mel" }));
+            project.RegisterExpression(new UExpressionDescriptor("stretch ms", STMS, -50, 50, 0));
 
             string message = string.Empty;
             if (ValidateExpression(project, "g", GEN)) {

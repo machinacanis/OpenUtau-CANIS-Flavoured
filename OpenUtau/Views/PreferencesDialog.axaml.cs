@@ -8,6 +8,8 @@ using Avalonia.Platform.Storage;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Colors;
 using OpenUtau.Core;
+using OpenUtau.Core.HiFiUtau;
+using Serilog;
 
 namespace OpenUtau.App.Views {
     public partial class PreferencesDialog : Window {
@@ -162,6 +164,56 @@ namespace OpenUtau.App.Views {
                 File.Delete(CustomTheme.Themes[viewModel!.ThemeName]);
                 viewModel!.RefreshThemes();
                 viewModel!.ThemeName = previousTheme;
+            }
+        }
+
+        async void SelectHifiUtauSplicerPath(object sender, RoutedEventArgs e) {
+            var path = await FilePicker.OpenFolderAboutSinger(this, "prefs.hifiutau.splicerpath");
+            if (string.IsNullOrEmpty(path)) {
+                return;
+            }
+            viewModel!.SetHifiUtauSplicerPath(path);
+        }
+
+        async void SelectHifiUtauHnsepPath(object sender, RoutedEventArgs e) {
+            var path = await FilePicker.OpenFolderAboutSinger(this, "prefs.hifiutau.hnseppath");
+            if (string.IsNullOrEmpty(path)) {
+                return;
+            }
+            viewModel!.SetHifiUtauHnsepPath(path);
+        }
+
+        void ResetHifiUtauPaths(object sender, RoutedEventArgs e) {
+            viewModel!.ResetHifiUtauPaths();
+        }
+
+        async void ReloadHifiUtauAll(object sender, RoutedEventArgs e) {
+            await ReloadHifiUtauImpl(() => HiFiUtauModelStore.Inst.ReloadAll());
+        }
+
+        async void ReloadHifiUtauSplicer(object sender, RoutedEventArgs e) {
+            await ReloadHifiUtauImpl(() => HiFiUtauModelStore.Inst.ReloadSplicer());
+        }
+
+        async void ReloadHifiUtauHnsep(object sender, RoutedEventArgs e) {
+            await ReloadHifiUtauImpl(() => HiFiUtauModelStore.Inst.ReloadHnsep());
+        }
+
+        async Task ReloadHifiUtauImpl(Action reload) {
+            LoadingWindow.BeginLoading(this);
+            Exception? error = await Task.Run(() => {
+                try {
+                    reload();
+                    return null;
+                } catch (Exception ex) {
+                    Log.Error(ex, "Failed to reload HiFiUTAU engine.");
+                    return ex;
+                }
+            });
+            viewModel!.RefreshHifiUtauStatus();
+            LoadingWindow.EndLoading();
+            if (error != null) {
+                await MessageBox.ShowError(this, error, "Failed to reload HiFiUTAU engine");
             }
         }
     }

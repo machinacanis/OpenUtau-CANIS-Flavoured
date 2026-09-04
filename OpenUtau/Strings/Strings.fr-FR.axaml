@@ -136,8 +136,10 @@ Nouveau tempo :</system:String>
 Do you want to continue by splitting at the nearest position after current playhead with no notes in the way?</system:String>-->
   <system:String x:Key="dialogs.timesig.caption">Mesure</system:String>
   <system:String x:Key="dialogs.tracksettings.caption">Paramètres de piste</system:String>
+  <!--<system:String x:Key="dialogs.tracksettings.endpoint">Endpoint</system:String>-->
   <system:String x:Key="dialogs.tracksettings.location">Emplacement</system:String>
   <system:String x:Key="dialogs.tracksettings.renderer">Système de rendu</system:String>
+  <!--<system:String x:Key="dialogs.tracksettings.serverurl">Server URL</system:String>-->
   <system:String x:Key="dialogs.tracksettings.setasdefault">Assigner par défaut</system:String>
   <!--<system:String x:Key="dialogs.transcribe.allnotfound">No transcription models are installed. Please install GAME via the Package Manager or download manually from {0}.</system:String>-->
   <!--<system:String x:Key="dialogs.transcribe.caption">Transcribe Audio</system:String>-->
@@ -199,6 +201,8 @@ Do you want to continue by splitting at the nearest position after current playh
   <!--<system:String x:Key="errors.failed.synth.cutoffexceedduration">Oto error: cutoff exceeds audio duration</system:String>-->
   <!--<system:String x:Key="errors.failed.transcribe.rmvpe">Error loading RMVPE ONNX model. Install it from the Package Manager, or put rmvpe.onnx in {0}</system:String>-->
   <!--<system:String x:Key="errors.failed.transcribe.some">Error loading SOME. Please download SOME from {0}</system:String>-->
+  <!--<system:String x:Key="errors.hifiutau.disabled">The HiFiUTAU embedded engine is disabled in Preferences > HiFiUTAU.</system:String>-->
+  <!--<system:String x:Key="errors.hifiutau.nomodels">HiFiUTAU models not found. Install pc_nsf_hifigan_44.1k_hop512_128bin_2025.02 and hnsep_VR_44.1k_hop512_2024.05 from the Package Manager. Do not use the PyTorch model.ckpt zip.</system:String>-->
   <system:String x:Key="errors.install.cpp">Essayez d'installer le dernier Visual C++ Redistributable. https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170</system:String>
   <system:String x:Key="errors.lyrics.regex">Caractère interdit en regex</system:String>
   <system:String x:Key="errors.lyrics.regexpreview">- Erreur liée à la regex -</system:String>
@@ -453,6 +457,8 @@ Attention : cela va effacer les préréglages.</system:String>
   <!--<system:String x:Key="packages.unknownversion">unknown version</system:String>-->
   <!--<system:String x:Key="packages.update">Update</system:String>-->
 
+  <!--<system:String x:Key="phoneme.show.error">Alt + Click to view the full error</system:String>-->
+
   <system:String x:Key="phoneticassistant.caption">Assistant phonétique</system:String>
   <system:String x:Key="phoneticassistant.copy">Copier</system:String>
 
@@ -595,6 +601,9 @@ Attention : cela va effacer les préréglages.</system:String>
   <!--<system:String x:Key="prefs.appearance.detachpianoroll">Show piano roll in separate window</system:String>-->
   <!--<system:String x:Key="prefs.appearance.diffsingerlangcodehide">Hide language prefix from phoneme editor</system:String>-->
   <system:String x:Key="prefs.appearance.lang">Langue</system:String>
+  <!--<system:String x:Key="prefs.appearance.notehoverglow">Note hover glow</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.playbacknotebounce">Bounce notes on playback</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.playbacknotehighlight">Highlight notes on playback</system:String>-->
   <system:String x:Key="prefs.appearance.showghostnotes">Montrer les notes des autres pistes sur le piano roll</system:String>
   <system:String x:Key="prefs.appearance.showicon">Montrer l'icône sur le piano roll</system:String>
   <system:String x:Key="prefs.appearance.showportrait">Montrer le portrait sur le piano roll</system:String>
@@ -607,9 +616,36 @@ Attention : cela va effacer les préréglages.</system:String>
   <system:String x:Key="prefs.cache.clearonquit">Effacer le cache à la fermeture du logiciel</system:String>
   <system:String x:Key="prefs.cache.diffsingertensorcache">Cache du Tensor de DiffSinger</system:String>
   <system:String x:Key="prefs.caption">Préférences</system:String>
+  <!--<system:String x:Key="prefs.channel">Release Channel</system:String>-->
+  <!--<system:String x:Key="prefs.channel.alpha">Alpha</system:String>-->
+  <!--<system:String x:Key="prefs.channel.beta">Beta</system:String>-->
+  <!--<system:String x:Key="prefs.channel.stable">Stable</system:String>-->
   <!--<system:String x:Key="prefs.diffsinger">DiffSinger</system:String>-->
   <system:String x:Key="prefs.editing">Édition</system:String>
   <!--<system:String x:Key="prefs.general">General</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.customserver">Custom Server backend address</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.customserver.hint">Default server URL used by the Custom Server renderer (e.g. http://localhost:8000). New tracks without an explicit URL use this value.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.embedded">Use embedded engine (in-process ONNX inference)</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.hnseppath">HN-SEP override (empty = Package Manager hnsep_VR_44.1k_hop512_2024.05). Directory must contain oudep.yaml and the HN-SEP ONNX.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.preload">Preload engine on startup</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.preload.hint">Loads models in the background while the editor starts. Takes effect on next launch.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload">Reload engine</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload.all">All</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload.hint">Applies model directory / thread changes and clears the render cache.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload.hnsep">HN-SEP</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.reload.splicer">Splicer</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.splicerpath">Vocoder override (empty = Package Manager pc_nsf_hifigan_44.1k_hop512_128bin_2025.02). Directory must contain vocoder.yaml and the ONNX named in it, not model.ckpt.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.format">Mode: {0}
+Splicer model: {1} ({2})
+HN-SEP model: {3} ({4})</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.mode.disabled">Disabled</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.mode.embedded">Embedded</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.notfound">not found</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.notloaded">not loaded</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.status.ready">loaded</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.threads">ONNX inference threads (per call)</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.threads.hint">0 = automatic. Limits CPU usage per inference; applied after reloading the engine.</system:String>-->
+  <!--<system:String x:Key="prefs.hifiutau.title">HiFiUTAU</system:String>-->
   <system:String x:Key="prefs.note.restart">Note: veuillez redémarrer OpenUtau après avoir changé cette option.</system:String>
   <system:String x:Key="prefs.otoeditor">Editeur d'Oto</system:String>
   <system:String x:Key="prefs.otoeditor.select">Editeur d'Oto par défaut</system:String>
@@ -629,6 +665,7 @@ Attention : cela va effacer les préréglages.</system:String>
   <system:String x:Key="prefs.playback.backend">Backend Audio</system:String>
   <system:String x:Key="prefs.playback.backend.auto">Automatique</system:String>
   <!--<system:String x:Key="prefs.playback.backend.mini">MiniAudio</system:String>-->
+  <!--<system:String x:Key="prefs.playback.backend.sdl3">SDL 3</system:String>-->
   <system:String x:Key="prefs.playback.cursorposition">Position du curseur</system:String>
   <system:String x:Key="prefs.playback.device">Sortie Audio</system:String>
   <system:String x:Key="prefs.playback.lockstarttime">En pause</system:String>
@@ -640,6 +677,7 @@ Attention : cela va effacer les préréglages.</system:String>
   <system:String x:Key="prefs.rendering">Rendu</system:String>
   <system:String x:Key="prefs.rendering.defaultrenderer">Système de rendu par défaut (pour les voix classiques)</system:String>
   <system:String x:Key="prefs.rendering.diffsingerdepth">Render Depth du DiffSinger</system:String>
+  <!--<system:String x:Key="prefs.rendering.diffsingerpitchlocalretaking">DiffSinger Pitch Local Retaking</system:String>-->
   <!--<system:String x:Key="prefs.rendering.diffsingersteps">DiffSinger Render Steps for Acoustic</system:String>-->
   <!--<system:String x:Key="prefs.rendering.diffsingerstepspitch">DiffSinger Render Steps for Pitch</system:String>-->
   <!--<system:String x:Key="prefs.rendering.diffsingerstepsvariance">DiffSinger Render Steps for Variance</system:String>-->
@@ -771,6 +809,8 @@ The voicebank may not work on another OS.</system:String>-->
   <system:String x:Key="singersetup.textfileencoding.prompt">Choisissez un encodage où le contenu des fichiers est lisible.</system:String>
   <!--<system:String x:Key="singersetup.title">Singer Setup</system:String>-->
 
+  <!--<system:String x:Key="themeeditor.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="themeeditor.save">Save</system:String>-->
   <!--<system:String x:Key="themeeditor.title">Theme Editor</system:String>-->
 
   <system:String x:Key="tip.aliasbox">Remplacer l'alias</system:String>

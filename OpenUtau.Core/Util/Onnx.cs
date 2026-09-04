@@ -129,37 +129,55 @@ namespace OpenUtau.Core {
             return options;
         }
 
-        public static InferenceSession getInferenceSession(byte[] model, OnnxRunnerChoice runnerChoice = OnnxRunnerChoice.Default) {
+        public static InferenceSession getInferenceSession(byte[] model, OnnxRunnerChoice runnerChoice = OnnxRunnerChoice.Default, Action<SessionOptions>? configure = null) {
             if (runnerChoice == OnnxRunnerChoice.CPU ||
                 (runnerChoice == OnnxRunnerChoice.CPUForCoreML && Preferences.Default.OnnxRunner == "CoreML")) {
-                return new InferenceSession(model);
+                if (configure == null) {
+                    return new InferenceSession(model);
+                }
+                var cpuOptions = new SessionOptions();
+                configure(cpuOptions);
+                return new InferenceSession(model, cpuOptions);
             } else {
                 // Try with CoreML subgraphs enabled first, fallback to default if it fails
                 if (OS.IsMacOS() && Preferences.Default.OnnxRunner == "CoreML") {
                     try {
-                        return new InferenceSession(model, getOnnxSessionOptions(coremlEnableOnSubgraphs: true));
+                        var coremlOptions = getOnnxSessionOptions(coremlEnableOnSubgraphs: true);
+                        configure?.Invoke(coremlOptions);
+                        return new InferenceSession(model, coremlOptions);
                     } catch (Exception e) {
                         Log.Warning(e, "Failed to create session with CoreML subgraphs enabled, falling back to default settings");
                     }
                 }
-                return new InferenceSession(model, getOnnxSessionOptions());
+                var options = getOnnxSessionOptions();
+                configure?.Invoke(options);
+                return new InferenceSession(model, options);
             }
         }
 
-        public static InferenceSession getInferenceSession(string modelPath, OnnxRunnerChoice runnerChoice = OnnxRunnerChoice.Default) {
+        public static InferenceSession getInferenceSession(string modelPath, OnnxRunnerChoice runnerChoice = OnnxRunnerChoice.Default, Action<SessionOptions>? configure = null) {
             if (runnerChoice == OnnxRunnerChoice.CPU ||
                 (runnerChoice == OnnxRunnerChoice.CPUForCoreML && Preferences.Default.OnnxRunner == "CoreML")) {
-                return new InferenceSession(modelPath);
+                if (configure == null) {
+                    return new InferenceSession(modelPath);
+                }
+                var cpuOptions = new SessionOptions();
+                configure(cpuOptions);
+                return new InferenceSession(modelPath, cpuOptions);
             } else {
                 // Try with CoreML subgraphs enabled first, fallback to default if it fails
                 if (OS.IsMacOS() && Preferences.Default.OnnxRunner == "CoreML") {
                     try {
-                        return new InferenceSession(modelPath, getOnnxSessionOptions(coremlEnableOnSubgraphs: true));
+                        var coremlOptions = getOnnxSessionOptions(coremlEnableOnSubgraphs: true);
+                        configure?.Invoke(coremlOptions);
+                        return new InferenceSession(modelPath, coremlOptions);
                     } catch (Exception e) {
                         Log.Warning(e, "Failed to create session with CoreML subgraphs enabled, falling back to default settings");
                     }
                 }
-                return new InferenceSession(modelPath, getOnnxSessionOptions());
+                var options = getOnnxSessionOptions();
+                configure?.Invoke(options);
+                return new InferenceSession(modelPath, options);
             }
         }
 

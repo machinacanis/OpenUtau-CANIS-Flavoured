@@ -13,6 +13,7 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using ReactiveUI.Primitives;
 using ReactiveUI.Avalonia;
+using OpenUtau.Core.HiFiUtau;
 using OpenUtau.Core.Render;
 using Serilog;
 
@@ -136,6 +137,16 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public partial bool DiffSingerLangCodeHide { get; set; }
         [Reactive] public partial bool DiffSingerLocalRetaking { get; set; }
 
+        // HiFiUTAU / Custom Server
+        [Reactive] public partial bool HifiUtauEmbedded { get; set; }
+        [Reactive] public partial string HifiUtauSplicerPath { get; set; } = string.Empty;
+        [Reactive] public partial string HifiUtauHnsepPath { get; set; } = string.Empty;
+        [Reactive] public partial bool HifiUtauPreload { get; set; }
+        public List<int> HifiUtauThreadsOptions { get; } = new List<int> { 0, 1, 2, 4, 8 };
+        [Reactive] public partial int HifiUtauIntraOpThreads { get; set; }
+        [Reactive] public partial string CustomServerUrl { get; set; } = string.Empty;
+        [Reactive] public partial string HifiUtauStatus { get; set; } = string.Empty;
+
         // Advanced
         [Reactive] public partial bool RememberMid { get; set; }
         [Reactive] public partial bool RememberUst { get; set; }
@@ -184,6 +195,13 @@ namespace OpenUtau.App.ViewModels {
             OnnxGpuOptions = Onnx.getGpuInfo();
             OnnxGpu = OnnxGpuOptions.FirstOrDefault(x => x.deviceId == Preferences.Default.OnnxGpu, OnnxGpuOptions[0]);
             ShowOnnxGpu = OnnxRunner == "DirectML";
+            HifiUtauEmbedded = Preferences.Default.HifiUtauEmbedded;
+            HifiUtauSplicerPath = Preferences.Default.HifiUtauSplicerPath;
+            HifiUtauHnsepPath = Preferences.Default.HifiUtauHnsepPath;
+            HifiUtauPreload = Preferences.Default.HifiUtauPreload;
+            HifiUtauIntraOpThreads = Preferences.Default.HifiUtauIntraOpThreads;
+            CustomServerUrl = Preferences.Default.DefaultServerUrl;
+            RefreshHifiUtauStatus();
             // GAME backend: ONNX is the default, GGML is available when installed.
             // The options list always includes both so the ComboBox UX is stable.
             GameBackend = Preferences.Default.GameBackend switch {
@@ -410,6 +428,41 @@ namespace OpenUtau.App.ViewModels {
                     Preferences.Default.OnnxGpu = index.deviceId;
                     Preferences.Save();
                 });
+            this.WhenAnyValue(vm => vm.HifiUtauEmbedded)
+                .Subscribe(value => {
+                    Preferences.Default.HifiUtauEmbedded = value;
+                    Preferences.Save();
+                    RefreshHifiUtauStatus();
+                });
+            this.WhenAnyValue(vm => vm.HifiUtauPreload)
+                .Subscribe(value => {
+                    Preferences.Default.HifiUtauPreload = value;
+                    Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.HifiUtauSplicerPath)
+                .Subscribe(path => {
+                    Preferences.Default.HifiUtauSplicerPath = path ?? string.Empty;
+                    Preferences.Save();
+                    RefreshHifiUtauStatus();
+                });
+            this.WhenAnyValue(vm => vm.HifiUtauHnsepPath)
+                .Subscribe(path => {
+                    Preferences.Default.HifiUtauHnsepPath = path ?? string.Empty;
+                    Preferences.Save();
+                    RefreshHifiUtauStatus();
+                });
+            this.WhenAnyValue(vm => vm.HifiUtauIntraOpThreads)
+                .Subscribe(value => {
+                    Preferences.Default.HifiUtauIntraOpThreads = value;
+                    Preferences.Save();
+                });
+            this.WhenAnyValue(vm => vm.CustomServerUrl)
+                .Subscribe(url => {
+                    if (!string.IsNullOrWhiteSpace(url)) {
+                        Preferences.Default.DefaultServerUrl = url;
+                        Preferences.Save();
+                    }
+                });
             this.WhenAnyValue(vm => vm.GameBackend)
                 .Subscribe(index => {
                     Preferences.Default.GameBackend = index == "GGML" ? "ggml" : "onnx";
@@ -534,6 +587,48 @@ namespace OpenUtau.App.ViewModels {
 
         public void ToggleOnnxGpuDisplay(bool show) {
             ShowOnnxGpu = show;
+        }
+
+        public void SetHifiUtauSplicerPath(string path) {
+            Preferences.Default.HifiUtauSplicerPath = path ?? string.Empty;
+            Preferences.Save();
+            HifiUtauSplicerPath = Preferences.Default.HifiUtauSplicerPath;
+            RefreshHifiUtauStatus();
+        }
+
+        public void SetHifiUtauHnsepPath(string path) {
+            Preferences.Default.HifiUtauHnsepPath = path ?? string.Empty;
+            Preferences.Save();
+            HifiUtauHnsepPath = Preferences.Default.HifiUtauHnsepPath;
+            RefreshHifiUtauStatus();
+        }
+
+        public void ResetHifiUtauPaths() {
+            Preferences.Default.HifiUtauSplicerPath = string.Empty;
+            Preferences.Default.HifiUtauHnsepPath = string.Empty;
+            Preferences.Save();
+            HifiUtauSplicerPath = string.Empty;
+            HifiUtauHnsepPath = string.Empty;
+            RefreshHifiUtauStatus();
+        }
+
+        public void RefreshHifiUtauStatus() {
+            var store = HiFiUtauModelStore.Inst;
+            string mode = Preferences.Default.HifiUtauEmbedded
+                ? ThemeManager.GetString("prefs.hifiutau.status.mode.embedded")
+                : ThemeManager.GetString("prefs.hifiutau.status.mode.disabled");
+            string splicer = store.SplicerReady
+                ? ThemeManager.GetString("prefs.hifiutau.status.ready")
+                : (store.SplicerError ?? ThemeManager.GetString("prefs.hifiutau.status.notloaded"));
+            string hnsep = store.HnsepReady
+                ? ThemeManager.GetString("prefs.hifiutau.status.ready")
+                : (store.HnsepError ?? ThemeManager.GetString("prefs.hifiutau.status.notloaded"));
+            HifiUtauStatus = string.Format(ThemeManager.GetString("prefs.hifiutau.status.format"),
+                mode,
+                store.SplicerDir ?? ThemeManager.GetString("prefs.hifiutau.status.notfound"),
+                splicer,
+                store.HnsepDir ?? ThemeManager.GetString("prefs.hifiutau.status.notfound"),
+                hnsep);
         }
     }
 }

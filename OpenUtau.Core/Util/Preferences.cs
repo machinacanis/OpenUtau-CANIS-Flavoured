@@ -290,6 +290,14 @@ errors.txt
             public bool MixFxApplyOnExportMixdown = true;
             public List<MixFxUserPreset> MixFxUserPresets = new List<MixFxUserPreset>();
 
+            public string DefaultServerUrl = "http://localhost:8000";
+            public string DefaultEndpoint = "/synthesize";
+            public bool HifiUtauEmbedded = true;
+            public string HifiUtauSplicerPath = string.Empty;
+            public string HifiUtauHnsepPath = string.Empty;
+            public bool HifiUtauPreload = false;
+            public int HifiUtauIntraOpThreads = 0;
+
             // Legacy
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
             public int? Theme;
