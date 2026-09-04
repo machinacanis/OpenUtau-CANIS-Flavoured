@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Styling;
 using OpenUtau.App.Controls;
+using OpenUtau.App.Studio;
 using OpenUtau.Core.Util;
 using ReactiveUI;
 
@@ -55,6 +59,16 @@ namespace OpenUtau.App {
         public static IBrush ExpShadowNameBrush = Brushes.White;
         public static IBrush ExpActiveBrush = Brushes.Black;
         public static IBrush ExpActiveNameBrush = Brushes.White;
+        public static IBrush NoteFillBrush = Brushes.Transparent;
+        public static IBrush NoteFillSelectedBrush = Brushes.Transparent;
+        public static IPen? NoteStrokePen;
+        public static IPen? NoteStrokeSelectedPen;
+        public static double NoteCornerRadius = 2;
+        public static IBrush OnAccentBrush = Brushes.White;
+        public static IBrush NoteLyricBrush = Brushes.White;
+        public static Typeface NoteLyricTypeface = Typeface.Default;
+        public static double NoteLyricFontSize = 12;
+        public static Color WaveformColor = Color.FromRgb(0x4E, 0xA6, 0xEA);
 
         public static List<TrackColor> TrackColors = new List<TrackColor>(){
                 new TrackColor("Pink", "#F06292", "#EC407A", "#F48FB1", "#FAC7D8"),
@@ -79,8 +93,10 @@ namespace OpenUtau.App {
 
         public static List<string> GetAvailableThemes() {
             Colors.CustomTheme.ListThemes();
-            return ["Light", "Dark", ..Colors.CustomTheme.Themes.Select(v => v.Key)];
+            return [..StudioUI.BuiltInThemes, ..Colors.CustomTheme.Themes.Select(v => v.Key)];
         }
+
+        public static bool IsBuiltIn(string themeName) => StudioUI.IsBuiltIn(themeName);
 
         public static void LoadTheme() {
             if (Application.Current == null) {
@@ -155,9 +171,173 @@ namespace OpenUtau.App {
                 RealCurveStrokeBrush = (IBrush)outVar!;
                 RealCurvePen = new Pen(RealCurveStrokeBrush, 2, DashStyle.Dash);
             }
+            ApplyPianoRollStyle(false);
             SetKeyboardBrush();
             TextLayoutCache.Clear();
             MessageBus.Current.SendMessage(new ThemeChangedEvent());
+        }
+
+        public static void ApplyPianoRollStyle(bool notify = true) {
+            var noteColor = SolidColor(AccentBrush1, Color.FromRgb(0x4E, 0xA6, 0xEA));
+            var noteSelectedColor = SolidColor(AccentBrush2, noteColor);
+            OnAccentBrush = IsDarkMode ? ForegroundBrush : BackgroundBrush;
+
+            if (!StudioUI.IsEnabled) {
+                NoteFillBrush = AccentBrush1;
+                NoteFillSelectedBrush = AccentBrush2;
+                NoteStrokePen = null;
+                NoteStrokeSelectedPen = null;
+                NoteCornerRadius = 2;
+                NoteLyricBrush = Brushes.White;
+                NoteLyricTypeface = Typeface.Default;
+                NoteLyricFontSize = 12;
+                WaveformColor = noteColor;
+                if (notify) {
+                    TextLayoutCache.Clear();
+                    MessageBus.Current.SendMessage(new ThemeChangedEvent());
+                }
+                return;
+            }
+
+            bool solid = Preferences.Default.NoteSolidFill;
+            if (solid) {
+                NoteFillBrush = AccentBrush1;
+                NoteFillSelectedBrush = AccentBrush2;
+            } else {
+                NoteFillBrush = new SolidColorBrush(noteColor, 0.22);
+                NoteFillSelectedBrush = new SolidColorBrush(noteSelectedColor, 0.28);
+            }
+
+            ResolvePalette(
+                Preferences.Default.NoteStrokeColorMode,
+                Preferences.Default.NoteStrokeColorHex,
+                Preferences.Default.NoteStrokeColorInvert,
+                out var stroke, out var strokeSelected);
+            double thickness = Math.Max(0, Preferences.Default.NoteStrokeThickness);
+            NoteStrokePen = new Pen(stroke, thickness);
+            NoteStrokeSelectedPen = new Pen(strokeSelected, thickness);
+            NoteCornerRadius = Preferences.Default.NoteRoundedCorners
+                ? Math.Max(0, Preferences.Default.NoteCornerRadiusPx)
+                : 0;
+
+            ResolvePalette(
+                Preferences.Default.PitchPredictionColorMode,
+                Preferences.Default.PitchPredictionColorHex,
+                Preferences.Default.PitchPredictionColorInvert,
+                out var pitch, out _);
+            FinalPitchBrush = pitch;
+            FinalPitchPen = new Pen(pitch, Math.Max(0, Preferences.Default.PitchPredictionThickness));
+
+            ResolvePalette(
+                Preferences.Default.WaveformColorMode,
+                Preferences.Default.WaveformColorHex,
+                Preferences.Default.WaveformColorInvert,
+                out var waveform, out _);
+            WaveformColor = SolidColor(waveform, noteColor);
+
+            ResolvePalette(
+                Preferences.Default.NoteLyricColorMode,
+                Preferences.Default.NoteLyricColorHex,
+                Preferences.Default.NoteLyricColorInvert,
+                out var lyric, out _);
+            NoteLyricBrush = lyric;
+            NoteLyricTypeface = BuildLyricTypeface();
+            NoteLyricFontSize = 12.0 * (Math.Max(1, Preferences.Default.NoteLyricScalePercent) / 100.0);
+            TextLayoutCache.Clear();
+
+            if (notify) {
+                MessageBus.Current.SendMessage(new ThemeChangedEvent());
+            }
+        }
+
+        static Typeface BuildLyricTypeface() {
+            FontFamily family = FontFamily.Default;
+            string raw = Preferences.Default.NoteLyricFontFamily?.Trim() ?? string.Empty;
+            if (raw.Length > 0) {
+                try {
+                    family = FontFamily.Parse(raw);
+                } catch {
+                    family = FontFamily.Default;
+                }
+            }
+            var weight = (FontWeight)Math.Clamp(Preferences.Default.NoteLyricWeight, 1, 999);
+            var style = Preferences.Default.NoteLyricItalic ? FontStyle.Italic : FontStyle.Normal;
+            return new Typeface(family, style, weight);
+        }
+
+        static void ResolvePalette(int mode, string? hex, bool invert, out IBrush normal, out IBrush selected) {
+            switch (mode) {
+                case 1: // accent
+                    normal = AccentBrush3;
+                    selected = AccentBrush2;
+                    break;
+                case 2: // gray
+                    normal = NeutralAccentBrush;
+                    selected = ForegroundBrush;
+                    break;
+                case 3: // light text
+                    normal = selected = LightTextBrush;
+                    break;
+                case 4: // dark text
+                    normal = selected = DarkTextBrush;
+                    break;
+                case 5: // rgb hex
+                    var rgb = new SolidColorBrush(ParseHexColor(hex, Color.FromRgb(0x4E, 0xA6, 0xEA)));
+                    normal = selected = rgb;
+                    break;
+                default: // theme
+                    normal = AccentBrush1;
+                    selected = AccentBrush2;
+                    break;
+            }
+            if (invert) {
+                normal = InvertBrush(normal);
+                selected = InvertBrush(selected);
+            }
+        }
+
+        static IBrush LightTextBrush => IsDarkMode ? ForegroundBrush : BackgroundBrush;
+        static IBrush DarkTextBrush => IsDarkMode ? BackgroundBrush : ForegroundBrush;
+
+        static IBrush InvertBrush(IBrush brush) {
+            var c = SolidColor(brush, Color.FromRgb(255, 255, 255));
+            return new SolidColorBrush(Color.FromArgb(c.A, (byte)(255 - c.R), (byte)(255 - c.G), (byte)(255 - c.B)));
+        }
+
+        public static Color ParseHexColor(string? hex, Color fallback) {
+            if (string.IsNullOrWhiteSpace(hex)) {
+                return fallback;
+            }
+            string s = hex.Trim();
+            if (s.StartsWith('#')) {
+                s = s.Substring(1);
+            } else if (s.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) {
+                s = s.Substring(2);
+            }
+            if (s.Length == 3 || s.Length == 4) {
+                var expanded = new StringBuilder(s.Length * 2);
+                foreach (char c in s) {
+                    expanded.Append(c);
+                    expanded.Append(c);
+                }
+                s = expanded.ToString();
+            }
+            if (s.Length == 6) {
+                s += "FF";
+            }
+            if (s.Length != 8 ||
+                !uint.TryParse(s, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out uint value)) {
+                return fallback;
+            }
+            byte r = (byte)((value >> 24) & 0xFF);
+            byte g = (byte)((value >> 16) & 0xFF);
+            byte b = (byte)((value >> 8) & 0xFF);
+            byte a = (byte)(value & 0xFF);
+            return Color.FromArgb(a, r, g, b);
+        }
+
+        public static Color SolidColor(IBrush brush, Color fallback) {
+            return brush is ISolidColorBrush solid ? solid.Color : fallback;
         }
 
         public static void ChangePianorollColor(string color) {

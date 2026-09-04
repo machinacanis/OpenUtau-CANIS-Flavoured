@@ -1,0 +1,66 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <system:Boolean x:Key="IsDarkMode">true</system:Boolean>
+
+  <!-- Studio One 6~7 / Dark Aero Base Dark Palette -->
+  <!-- Main workspace background: deep obsidian charcoal -->
+  <Color x:Key="BackgroundColor">#141619</Color>
+  <!-- Hover / elevated surfaces -->
+  <Color x:Key="BackgroundColorPointerOver">#1F2329</Color>
+  <!-- Pressed surfaces / secondary containers -->
+  <Color x:Key="BackgroundColorPressed">#292E36</Color>
+  <!-- Disabled background -->
+  <Color x:Key="BackgroundColorDisabled">#101214</Color>
+
+  <!-- Cool Slate / Off-White Foregrounds -->
+  <Color x:Key="ForegroundColor">#E2E6EC</Color>
+  <Color x:Key="ForegroundColorPointerOver">#FFFFFF</Color>
+  <Color x:Key="ForegroundColorPressed">#F0F3F8</Color>
+  <Color x:Key="ForegroundColorDisabled">#555D6C</Color>
+
+  <!-- Studio One Precision 1px Borders -->
+  <Color x:Key="BorderColor">#2B303A</Color>
+  <Color x:Key="BorderColorPointerOver">#3E4654</Color>
+
+  <!-- Studio One Signature Electric Blue Accents -->
+  <Color x:Key="SystemAccentColor">#00A3FF</Color>
+  <!-- PointerOver / Glow -->
+  <Color x:Key="SystemAccentColorLight1">#38BDF8</Color>
+  <!-- Pressed / Fill -->
+  <Color x:Key="SystemAccentColorDark1">#0084D1</Color>
+
+  <!-- Neutral Slate Toolbars & Controls -->
+  <Color x:Key="NeutralAccentColor">#323742</Color>
+  <Color x:Key="NeutralAccentColorPointerOver">#424957</Color>
+
+  <!-- Arranger & Notes: Electric Blue (Primary) & Luminous Electric Cyan (Selected) & Cyan Accent -->
+  <Color x:Key="AccentColor1">#0084D1</Color>
+  <Color x:Key="AccentColor2">#00B8FF</Color>
+  <Color x:Key="AccentColor3">#00E5FF</Color>
+
+  <!-- Grid, Ruler & Pitch Curves -->
+  <Color x:Key="TickLineColor">#232730</Color>
+  <Color x:Key="BarNumberColor">#6E7788</Color>
+  <Color x:Key="FinalPitchColor">#38BDF8</Color>
+  <Color x:Key="TrackBackgroundAltColor">#181B20</Color>
+
+  <!-- Warning Color -->
+  <Color x:Key="WarningColor">#3D2700</Color>
+
+  <!-- Keyboard Background: Dark Aero with Electric Blue C-Key Highlight -->
+  <!-- White keys: Sleek dark graphite with subtle bevel, neutral silver text -->
+  <Color x:Key="WhiteKeyColorLeft">#23272F</Color>
+  <Color x:Key="WhiteKeyColorRight">#2B303A</Color>
+  <Color x:Key="WhiteKeyNameColor">#CCD3DE</Color>
+
+  <!-- Center keys (C1, C2, C3, C4, C5): Dark Aero blue glass tint, Electric Blue text -->
+  <Color x:Key="CenterKeyColorLeft">#152434</Color>
+  <Color x:Key="CenterKeyColorRight">#1A2F45</Color>
+  <Color x:Key="CenterKeyNameColor">#00A3FF</Color>
+
+  <!-- Black keys: Deep obsidian black, muted slate text -->
+  <Color x:Key="BlackKeyColorLeft">#101215</Color>
+  <Color x:Key="BlackKeyColorRight">#15171B</Color>
+  <Color x:Key="BlackKeyNameColor">#616B7B</Color>
+</ResourceDictionary>

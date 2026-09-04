@@ -91,6 +91,12 @@ Avalonia 12 + ReactiveUI。ViewModel 继承 `ViewModelBase`（`ReactiveObject`�
 
 主题：`OpenUtau/Colors/`。颜色走 `ThemeManager` 刷子 + `{DynamicResource ...}`。
 
+**Studio UI**：偏好外观里的 `UseStudioUI`（默认关）。关掉时编辑器、布局、钢琴卷帘绘制保持经典 OpenUtau。打开后才加载 Studio chrome（`Styles/StudioStyles.axaml`）、Studio/WarmSage 内置主题，以及钢琴卷帘波形/音符/歌词外观配置。
+
+- 共享：`NotesViewModel`、Command、hit testing、`NoteEditStates` 仍是唯一编辑逻辑。
+- Studio 专属：`OpenUtau/Studio/`。以后只在 Studio 里出现的功能或布局改动放这里，不要在 ViewModel 里散落 `if (UseStudioUI)`。
+- 绘制：`NotesCanvas` / `WaveformImage` 读 `ThemeManager`；`ApplyPianoRollStyle` 在开关关闭时回到经典刷子。
+
 `OpenUtau.csproj` 开了 `TreatWarningsAsErrors`。
 
 ## Build and test

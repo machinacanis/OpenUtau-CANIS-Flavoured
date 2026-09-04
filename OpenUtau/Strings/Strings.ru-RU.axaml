@@ -452,6 +452,8 @@ Syntax: prefix,suffix</system:String>-->
   <!--<system:String x:Key="packages.unknownversion">unknown version</system:String>-->
   <!--<system:String x:Key="packages.update">Update</system:String>-->
 
+  <!--<system:String x:Key="phoneme.show.error">Alt + Click to view the full error</system:String>-->
+
   <system:String x:Key="phoneticassistant.caption">Фонетический помощник</system:String>
   <system:String x:Key="phoneticassistant.copy">Скопировть</system:String>
 
@@ -581,6 +583,13 @@ Syntax: prefix,suffix</system:String>-->
   <!--<system:String x:Key="prefs.advanced.wayland">Use Wayland</system:String>-->
   <!--<system:String x:Key="prefs.advanced.winepath">Wine Path (set to enable wine for compatibility)</system:String>-->
   <system:String x:Key="prefs.appearance">Интерфейс</system:String>
+  <!--<system:String x:Key="prefs.appearance.color.accent">Accent</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.dark">Dark text</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.gray">Gray</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.invert">Invert</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.light">Light text</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.rgb">RGB</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.theme">Theme</system:String>-->
   <!--<system:String x:Key="prefs.appearance.customtheme.create.empty">Theme name cannot be empty.</system:String>-->
   <!--<system:String x:Key="prefs.appearance.customtheme.create.prompt">Enter Theme Name</system:String>-->
   <!--<system:String x:Key="prefs.appearance.customtheme.create.title">Create Custom Theme</system:String>-->
@@ -594,18 +603,63 @@ Syntax: prefix,suffix</system:String>-->
   <!--<system:String x:Key="prefs.appearance.detachpianoroll">Show piano roll in separate window</system:String>-->
   <system:String x:Key="prefs.appearance.diffsingerlangcodehide">Спрятать Языковой префикс </system:String>
   <system:String x:Key="prefs.appearance.lang">Язык</system:String>
+  <!--<system:String x:Key="prefs.appearance.notehoverglow">Note hover glow</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric">Note lyrics</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.color">Lyric color</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.font">Lyric font (comma-separated fallbacks)</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.halign">Horizontal alignment</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.halign.center">Align center</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.halign.left">Align left</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.halign.right">Align right</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.italic">Italic lyrics</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.scale">Lyric scale</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.valign">Vertical alignment</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.valign.above">Above note</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.valign.below">Below note</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.valign.inside">Inside note</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.weight">Lyric weight</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke">Note stroke</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke.rounded">Rounded note corners</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke.rounded.radius">Corner radius</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke.solid">Solid notes</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke.thickness">Stroke thickness</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.pitchprediction">Pitch prediction line</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.pitchprediction.thickness">Line thickness</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.playbacknotebounce">Bounce notes on playback</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.playbacknotehighlight">Highlight notes on playback</system:String>-->
   <system:String x:Key="prefs.appearance.showghostnotes">Отображать ноты других треков на пианоролле</system:String>
   <system:String x:Key="prefs.appearance.showicon">Отображать иконку на пианоролле</system:String>
   <system:String x:Key="prefs.appearance.showportrait">Отображать портрет на пианоролле</system:String>
   <system:String x:Key="prefs.appearance.sortorder">Порядок сортировки вокалистов</system:String>
+  <!--<system:String x:Key="prefs.appearance.studioui">Use Studio UI</system:String>-->
   <system:String x:Key="prefs.appearance.theme">Тема</system:String>
   <system:String x:Key="prefs.appearance.theme.dark">Темная</system:String>
   <system:String x:Key="prefs.appearance.theme.light">Светлая</system:String>
   <system:String x:Key="prefs.appearance.trackcolor">Использовать цвет дорожки в интерфейсе</system:String>
+  <!--<system:String x:Key="prefs.appearance.waveform">Piano roll waveform</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.color">Waveform color</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.fadein">Head fade length</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.fadeout">Tail fade length</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.fill">Waveform fill</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.fixed.bottom">Distance from bottom</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.follow">Follow placement</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.follow.absolute">Absolute</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.follow.smart">Smart</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.gradient">Gradient</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.layout">Waveform layout</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.layout.embed">Embed</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.layout.fixed">Fixed</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.layout.follow">Follow</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.scale">Waveform scale</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.solid">Solid</system:String>-->
   <system:String x:Key="prefs.cache">Кэш</system:String>
   <system:String x:Key="prefs.cache.clearonquit">Очищать кэш при выходе</system:String>
   <system:String x:Key="prefs.cache.diffsingertensorcache">Тензорный кэш DiffSinger</system:String>
   <system:String x:Key="prefs.caption">Параметры</system:String>
+  <!--<system:String x:Key="prefs.channel">Release Channel</system:String>-->
+  <!--<system:String x:Key="prefs.channel.alpha">Alpha</system:String>-->
+  <!--<system:String x:Key="prefs.channel.beta">Beta</system:String>-->
+  <!--<system:String x:Key="prefs.channel.stable">Stable</system:String>-->
   <system:String x:Key="prefs.diffsinger">ДиффСингер</system:String>
   <system:String x:Key="prefs.editing">Редактирование</system:String>
   <!--<system:String x:Key="prefs.general">General</system:String>-->
@@ -628,6 +682,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.playback.backend">Звуковой бэкенд</system:String>
   <system:String x:Key="prefs.playback.backend.auto">Автоматический</system:String>
   <system:String x:Key="prefs.playback.backend.mini">МиниАудио</system:String>
+  <!--<system:String x:Key="prefs.playback.backend.sdl3">SDL 3</system:String>-->
   <system:String x:Key="prefs.playback.cursorposition">Поле автопрокрутки</system:String>
   <system:String x:Key="prefs.playback.device">Устройство воспроизведения</system:String>
   <system:String x:Key="prefs.playback.lockstarttime">На паузе</system:String>
@@ -639,6 +694,7 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="prefs.rendering">Рендеринг</system:String>
   <system:String x:Key="prefs.rendering.defaultrenderer">Рендерер по-умолчанию (для классических войсбанков)</system:String>
   <system:String x:Key="prefs.rendering.diffsingerdepth">Глубина рендеринга DiffSinger</system:String>
+  <!--<system:String x:Key="prefs.rendering.diffsingerpitchlocalretaking">DiffSinger Pitch Local Retaking</system:String>-->
   <system:String x:Key="prefs.rendering.diffsingersteps">Количество шагов для рендера acoustic Diffsinger</system:String>
   <system:String x:Key="prefs.rendering.diffsingerstepspitch">Количество шагов для рендера питча Diffsinger</system:String>
   <system:String x:Key="prefs.rendering.diffsingerstepsvariance">Количество шагов для рендера variance Diffsinger</system:String>
@@ -770,6 +826,8 @@ The voicebank may not work on another OS.</system:String>-->
   <system:String x:Key="singersetup.textfileencoding.prompt">Выберите кодировку, в которой содержимое файла будет выглядеть правильно.</system:String>
   <!--<system:String x:Key="singersetup.title">Singer Setup</system:String>-->
 
+  <!--<system:String x:Key="themeeditor.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="themeeditor.save">Save</system:String>-->
   <!--<system:String x:Key="themeeditor.title">Theme Editor</system:String>-->
 
   <system:String x:Key="tip.aliasbox">Заменить алиасы</system:String>

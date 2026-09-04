@@ -211,12 +211,48 @@ namespace OpenUtau.Core.Util {
             public bool NoteHoverGlow = true;
             public bool ShowPlaybackNoteHighlight = true;
             public bool ShowPlaybackNoteBounce = false;
+            /// <summary>
+            /// Opt-in Studio UI chrome, piano-roll appearance, and Studio-only
+            /// editor layout. Classic editing is unchanged while this is false.
+            /// </summary>
+            public bool UseStudioUI = false;
             public EditTool EditTool = new EditTool();
             public bool PlayTone = true;
             public bool ShowVibrato = true;
             public bool ShowPitch = true;
             public bool ShowFinalPitch = true;
             public bool ShowWaveform = true;
+            public int WaveformStyle = 1; // 0 = gradient, 1 = solid
+            public int WaveformLayout = 0; // 0 = embed, 1 = follow, 2 = fixed
+            public int WaveformFollowMode = 1; // 0 = absolute, 1 = smart
+            public int WaveformFadeInMs = 80;
+            public int WaveformFadeOutMs = 80;
+            // Color modes: 0=theme, 1=accent, 2=gray, 3=light text, 4=dark text, 5=rgb
+            public int WaveformColorMode = 0;
+            public string WaveformColorHex = "#4EA6EAFF";
+            public bool WaveformColorInvert = false;
+            public int WaveformScalePercent = 150;
+            public int WaveformFixedBottomPx = 120;
+            public int NoteStrokeColorMode = 1;
+            public string NoteStrokeColorHex = "#FFFFFFFF";
+            public bool NoteStrokeColorInvert = false;
+            public int NoteStrokeThickness = 1;
+            public int PitchPredictionColorMode = 0;
+            public string PitchPredictionColorHex = "#FFFFFFFF";
+            public bool PitchPredictionColorInvert = true;
+            public int PitchPredictionThickness = 2;
+            public bool NoteRoundedCorners = false;
+            public int NoteCornerRadiusPx = 5;
+            public bool NoteSolidFill = false;
+            public int NoteLyricVAlign = 2; // 0 = above, 1 = inside, 2 = below
+            public int NoteLyricHAlign = 0; // 0 = left, 1 = center, 2 = right
+            public string NoteLyricFontFamily = "Noto Sans, Segoe UI";
+            public int NoteLyricScalePercent = 130;
+            public int NoteLyricWeight = 600;
+            public bool NoteLyricItalic = false;
+            public int NoteLyricColorMode = 3;
+            public string NoteLyricColorHex = "#FFFFFFFF";
+            public bool NoteLyricColorInvert = false;
             public bool ShowPhoneme = true;
             public bool ShowExpressions = true;
             public bool ShowPhonemizerTags = true;

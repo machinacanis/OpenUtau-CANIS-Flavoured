@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Threading;
+using OpenUtau.App.Studio;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
@@ -183,6 +184,8 @@ namespace OpenUtau.App.Controls {
             hoverTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1000.0 / 60.0) };
             hoverTimer.Tick += (_, _) => UpdateHoverGlow();
 
+            MessageBus.Current.Listen<ThemeChangedEvent>()
+                .Subscribe(_ => InvalidateVisual());
             MessageBus.Current.Listen<NotesRefreshEvent>()
                 .Subscribe(_ => InvalidateVisual());
             MessageBus.Current.Listen<NotesSelectionEvent>()
@@ -565,11 +568,24 @@ namespace OpenUtau.App.Controls {
                     hasError = true;
                 }
             }
-            // apply the transparent/greyed-out brush if an error was found
-            var brush = selectedNotes.Contains(note)
-                ? (hasError ? ThemeManager.AccentBrush3Semi : ThemeManager.AccentBrush2)
-                : (hasError ? ThemeManager.NeutralAccentBrushSemi : ThemeManager.AccentBrush1);
-            if (!selectedNotes.Contains(note)) {
+            bool selected = selectedNotes.Contains(note);
+            bool studio = StudioUI.IsEnabled;
+            double radius = studio ? ThemeManager.NoteCornerRadius : 2;
+            IBrush brush;
+            IPen? pen = null;
+            if (studio) {
+                brush = hasError
+                    ? (selected ? ThemeManager.AccentBrush2Semi : ThemeManager.AccentBrush1Semi)
+                    : (selected ? ThemeManager.NoteFillSelectedBrush : ThemeManager.NoteFillBrush);
+                if (!Preferences.Default.NoteSolidFill) {
+                    pen = selected ? ThemeManager.NoteStrokeSelectedPen : ThemeManager.NoteStrokePen;
+                }
+            } else {
+                brush = selected
+                    ? (hasError ? ThemeManager.AccentBrush3Semi : ThemeManager.AccentBrush2)
+                    : (hasError ? ThemeManager.NeutralAccentBrushSemi : ThemeManager.AccentBrush1);
+            }
+            if (!selected) {
                 float highlight = ShowPlaybackNoteHighlight
                     ? (note == activePlaybackNote ? activeHighlight : note == fadingPlaybackNote ? fadingHighlight : 0)
                     : 0;
@@ -577,9 +593,9 @@ namespace OpenUtau.App.Controls {
                     brush = BlendBrush(brush, hasError ? ThemeManager.AccentBrush3Semi : ThemeManager.AccentBrush2, highlight);
                 }
             }
-            context.DrawRectangle(brush, null, new Rect(leftTop, rightBottom), 2, 2);
+            context.DrawRectangle(brush, pen, new Rect(leftTop, rightBottom), radius, radius);
             if (Preferences.Default.NoteHoverGlow) {
-                DrawHoverGlow(context, leftTop, size, 2, GetHoverGlow(note));
+                DrawHoverGlow(context, leftTop, size, radius, GetHoverGlow(note));
             }
             if (TrackHeight < 10 || note.lyric.Length == 0) {
                 return;
@@ -619,7 +635,7 @@ namespace OpenUtau.App.Controls {
                             boxRect.Y + boxHeight / 2
                         );
                         context.DrawRectangle(badgeBrush, null, boxRect, 3, 3);
-                        context.DrawEllipse(Brushes.White, null, center, dotRadius, dotRadius);
+                        context.DrawEllipse(studio ? ThemeManager.OnAccentBrush : Brushes.White, null, center, dotRadius, dotRadius);
                         
                     } else {
                         var factory = OpenUtau.Api.PhonemizerFactory.Get(currentPh) ?? OpenUtau.Api.PhonemizerFactory.GetAll().FirstOrDefault(f => f.name == currentPh || (currentPh.Length > 0 && f.name.EndsWith(currentPh)));
@@ -635,7 +651,7 @@ namespace OpenUtau.App.Controls {
                             }
                         }
                         if (!string.IsNullOrEmpty(displayLang)) {
-                            var langLayout = TextLayoutCache.Get(displayLang, Avalonia.Media.Brushes.White, 10);
+                            var langLayout = TextLayoutCache.Get(displayLang, studio ? ThemeManager.OnAccentBrush : Brushes.White, 10);
                             double paddingX = 3;
                             double paddingY = 1.5;
                             Avalonia.Rect badgeRect = new Avalonia.Rect(
@@ -652,6 +668,10 @@ namespace OpenUtau.App.Controls {
                         }
                     }
                 }
+            }
+            if (studio) {
+                DrawStudioLyric(note.lyric, leftTop, size, context);
+                return;
             }
             string displayLyric = note.lyric;
             int txtsize = 12;
@@ -677,6 +697,58 @@ namespace OpenUtau.App.Controls {
             }
         }
 
+        private static void DrawStudioLyric(string lyric, Point leftTop, Size size, DrawingContext context) {
+            int vAlign = Math.Clamp(Preferences.Default.NoteLyricVAlign, 0, 2);
+            int hAlign = Math.Clamp(Preferences.Default.NoteLyricHAlign, 0, 2);
+            var typeface = ThemeManager.NoteLyricTypeface;
+            var brush = ThemeManager.NoteLyricBrush;
+            double fontSize = ThemeManager.NoteLyricFontSize;
+            const double pad = 5;
+
+            var textLayout = TextLayoutCache.Get(lyric, brush, fontSize, typeface);
+            if (vAlign == 1) {
+                if (fontSize > size.Height) {
+                    return;
+                }
+                if (textLayout.Width + pad > size.Width) {
+                    string truncated = lyric[0] + "..";
+                    textLayout = TextLayoutCache.Get(truncated, brush, fontSize, typeface);
+                    if (textLayout.Width + pad > size.Width) {
+                        return;
+                    }
+                }
+            }
+
+            double x;
+            switch (hAlign) {
+                case 1:
+                    x = leftTop.X + (size.Width - textLayout.Width) / 2;
+                    break;
+                case 2:
+                    x = leftTop.X + size.Width - textLayout.Width - pad;
+                    break;
+                default:
+                    x = leftTop.X + pad;
+                    break;
+            }
+            double y;
+            switch (vAlign) {
+                case 0:
+                    y = leftTop.Y - textLayout.Height - 2;
+                    break;
+                case 2:
+                    y = leftTop.Y + size.Height + 2;
+                    break;
+                default:
+                    y = leftTop.Y + (size.Height - textLayout.Height) / 2;
+                    break;
+            }
+            Point textPosition = new Point(x, Math.Round(y));
+            using (var state = context.PushTransform(Matrix.CreateTranslation(textPosition.X, textPosition.Y))) {
+                textLayout.Draw(context, new Point());
+            }
+        }
+
         private void RenderGhostNote(UNote note, NotesViewModel viewModel, DrawingContext context, int partOffset, IBrush brush) {
             // REVIEW should ghost note be smaller?
             double relativeSize = 0.5d;
@@ -690,7 +762,8 @@ namespace OpenUtau.App.Controls {
 
             Point rightBottom = new Point(leftTop.X + size.Width, leftTop.Y + size.Height);
 
-            context.DrawRectangle(brush, null, new Rect(leftTop, rightBottom), 2, 2);
+            double radius = StudioUI.IsEnabled ? ThemeManager.NoteCornerRadius : 2;
+            context.DrawRectangle(brush, null, new Rect(leftTop, rightBottom), radius, radius);
         }
 
         private void RenderPitchBend(UNote note, NotesViewModel viewModel, DrawingContext context) {

@@ -452,6 +452,8 @@ Warning: this option removes custom presets.</system:String>-->
   <!--<system:String x:Key="packages.unknownversion">unknown version</system:String>-->
   <!--<system:String x:Key="packages.update">Update</system:String>-->
 
+  <!--<system:String x:Key="phoneme.show.error">Alt + Click to view the full error</system:String>-->
+
   <!--<system:String x:Key="phoneticassistant.caption">Phonetic Assistant</system:String>-->
   <!--<system:String x:Key="phoneticassistant.copy">Copy</system:String>-->
 
@@ -584,6 +586,13 @@ Warning: this option removes custom presets.</system:String>-->
   <!--<system:String x:Key="prefs.advanced.wayland">Use Wayland</system:String>-->
   <!--<system:String x:Key="prefs.advanced.winepath">Wine Path (set to enable wine for compatibility)</system:String>-->
   <system:String x:Key="prefs.appearance">Ulkonäkö</system:String>
+  <!--<system:String x:Key="prefs.appearance.color.accent">Accent</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.dark">Dark text</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.gray">Gray</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.invert">Invert</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.light">Light text</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.rgb">RGB</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.theme">Theme</system:String>-->
   <!--<system:String x:Key="prefs.appearance.customtheme.create.empty">Theme name cannot be empty.</system:String>-->
   <!--<system:String x:Key="prefs.appearance.customtheme.create.prompt">Enter Theme Name</system:String>-->
   <!--<system:String x:Key="prefs.appearance.customtheme.create.title">Create Custom Theme</system:String>-->
@@ -597,18 +606,63 @@ Warning: this option removes custom presets.</system:String>-->
   <!--<system:String x:Key="prefs.appearance.detachpianoroll">Show piano roll in separate window</system:String>-->
   <!--<system:String x:Key="prefs.appearance.diffsingerlangcodehide">Hide language prefix from phoneme editor</system:String>-->
   <system:String x:Key="prefs.appearance.lang">Kieli</system:String>
+  <!--<system:String x:Key="prefs.appearance.notehoverglow">Note hover glow</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric">Note lyrics</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.color">Lyric color</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.font">Lyric font (comma-separated fallbacks)</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.halign">Horizontal alignment</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.halign.center">Align center</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.halign.left">Align left</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.halign.right">Align right</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.italic">Italic lyrics</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.scale">Lyric scale</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.valign">Vertical alignment</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.valign.above">Above note</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.valign.below">Below note</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.valign.inside">Inside note</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notelyric.weight">Lyric weight</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke">Note stroke</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke.rounded">Rounded note corners</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke.rounded.radius">Corner radius</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke.solid">Solid notes</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.notestroke.thickness">Stroke thickness</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.pitchprediction">Pitch prediction line</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.pitchprediction.thickness">Line thickness</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.playbacknotebounce">Bounce notes on playback</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.playbacknotehighlight">Highlight notes on playback</system:String>-->
   <!--<system:String x:Key="prefs.appearance.showghostnotes">Show other tracks' notes on piano roll</system:String>-->
   <!--<system:String x:Key="prefs.appearance.showicon">Show icon on piano roll</system:String>-->
   <!--<system:String x:Key="prefs.appearance.showportrait">Show portrait on piano roll</system:String>-->
   <!--<system:String x:Key="prefs.appearance.sortorder">Singer name display language</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.studioui">Use Studio UI</system:String>-->
   <system:String x:Key="prefs.appearance.theme">Teema</system:String>
   <system:String x:Key="prefs.appearance.theme.dark">Tumma</system:String>
   <system:String x:Key="prefs.appearance.theme.light">Vaalea</system:String>
   <!--<system:String x:Key="prefs.appearance.trackcolor">Use track color in UI</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform">Piano roll waveform</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.color">Waveform color</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.fadein">Head fade length</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.fadeout">Tail fade length</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.fill">Waveform fill</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.fixed.bottom">Distance from bottom</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.follow">Follow placement</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.follow.absolute">Absolute</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.follow.smart">Smart</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.gradient">Gradient</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.layout">Waveform layout</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.layout.embed">Embed</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.layout.fixed">Fixed</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.layout.follow">Follow</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.scale">Waveform scale</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.waveform.solid">Solid</system:String>-->
   <!--<system:String x:Key="prefs.cache">Cache</system:String>-->
   <!--<system:String x:Key="prefs.cache.clearonquit">Clear cache on quit</system:String>-->
   <!--<system:String x:Key="prefs.cache.diffsingertensorcache">DiffSinger Tensor Cache</system:String>-->
   <system:String x:Key="prefs.caption">Asetukset</system:String>
+  <!--<system:String x:Key="prefs.channel">Release Channel</system:String>-->
+  <!--<system:String x:Key="prefs.channel.alpha">Alpha</system:String>-->
+  <!--<system:String x:Key="prefs.channel.beta">Beta</system:String>-->
+  <!--<system:String x:Key="prefs.channel.stable">Stable</system:String>-->
   <!--<system:String x:Key="prefs.diffsinger">DiffSinger</system:String>-->
   <!--<system:String x:Key="prefs.editing">Editing</system:String>-->
   <!--<system:String x:Key="prefs.general">General</system:String>-->
@@ -631,6 +685,7 @@ Warning: this option removes custom presets.</system:String>-->
   <!--<system:String x:Key="prefs.playback.backend">Audio Backend</system:String>-->
   <!--<system:String x:Key="prefs.playback.backend.auto">Automatic</system:String>-->
   <!--<system:String x:Key="prefs.playback.backend.mini">MiniAudio</system:String>-->
+  <!--<system:String x:Key="prefs.playback.backend.sdl3">SDL 3</system:String>-->
   <!--<system:String x:Key="prefs.playback.cursorposition">Auto-Scroll Margin</system:String>-->
   <system:String x:Key="prefs.playback.device">Äänentoistolaite</system:String>
   <!--<system:String x:Key="prefs.playback.lockstarttime">On Pausing</system:String>-->
@@ -642,6 +697,7 @@ Warning: this option removes custom presets.</system:String>-->
   <system:String x:Key="prefs.rendering">Renderöi</system:String>
   <!--<system:String x:Key="prefs.rendering.defaultrenderer">Default renderer (for classic voicebanks)</system:String>-->
   <!--<system:String x:Key="prefs.rendering.diffsingerdepth">DiffSinger Render Depth</system:String>-->
+  <!--<system:String x:Key="prefs.rendering.diffsingerpitchlocalretaking">DiffSinger Pitch Local Retaking</system:String>-->
   <!--<system:String x:Key="prefs.rendering.diffsingersteps">DiffSinger Render Steps for Acoustic</system:String>-->
   <!--<system:String x:Key="prefs.rendering.diffsingerstepspitch">DiffSinger Render Steps for Pitch</system:String>-->
   <!--<system:String x:Key="prefs.rendering.diffsingerstepsvariance">DiffSinger Render Steps for Variance</system:String>-->
@@ -769,6 +825,8 @@ The voicebank may not work on another OS.</system:String>-->
   <!--<system:String x:Key="singersetup.textfileencoding.prompt">Choose an encoding that make file contents look right.</system:String>-->
   <!--<system:String x:Key="singersetup.title">Singer Setup</system:String>-->
 
+  <!--<system:String x:Key="themeeditor.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="themeeditor.save">Save</system:String>-->
   <!--<system:String x:Key="themeeditor.title">Theme Editor</system:String>-->
 
   <!--<system:String x:Key="tip.aliasbox">Override Alias</system:String>-->

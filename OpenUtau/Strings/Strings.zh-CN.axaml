@@ -422,7 +422,7 @@
   <system:String x:Key="packages.caption">插件</system:String>
   <system:String x:Key="packages.col.action">操作</system:String>
   <system:String x:Key="packages.col.developer">开发者</system:String>
-  <system:String x:Key="packages.col.id">Id</system:String>
+  <!--<system:String x:Key="packages.col.id">Id</system:String>-->
   <system:String x:Key="packages.col.installed">已安装</system:String>
   <system:String x:Key="packages.col.name">名称</system:String>
   <system:String x:Key="packages.col.version">版本</system:String>
@@ -451,6 +451,8 @@
   <system:String x:Key="packages.uninstall">卸载</system:String>
   <system:String x:Key="packages.unknownversion">未知版本</system:String>
   <system:String x:Key="packages.update">更新</system:String>
+
+  <!--<system:String x:Key="phoneme.show.error">Alt + Click to view the full error</system:String>-->
 
   <system:String x:Key="phoneticassistant.caption">语音学助手</system:String>
   <system:String x:Key="phoneticassistant.copy">复制</system:String>
@@ -581,6 +583,13 @@
   <system:String x:Key="prefs.advanced.wayland">使用 Wayland</system:String>
   <system:String x:Key="prefs.advanced.winepath">Wine 路径（设置以启用 Wine 获得兼容性）</system:String>
   <system:String x:Key="prefs.appearance">外观</system:String>
+  <system:String x:Key="prefs.appearance.color.accent">强调色</system:String>
+  <system:String x:Key="prefs.appearance.color.dark">暗色文本</system:String>
+  <system:String x:Key="prefs.appearance.color.gray">灰色</system:String>
+  <system:String x:Key="prefs.appearance.color.invert">反色</system:String>
+  <system:String x:Key="prefs.appearance.color.light">亮色文本</system:String>
+  <!--<system:String x:Key="prefs.appearance.color.rgb">RGB</system:String>-->
+  <system:String x:Key="prefs.appearance.color.theme">主题色</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.empty">主题名称不能为空。</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.prompt">输入主题名称</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.title">创建自定义主题</system:String>
@@ -594,19 +603,64 @@
   <system:String x:Key="prefs.appearance.detachpianoroll">在独立窗口中显示钢琴卷帘</system:String>
   <system:String x:Key="prefs.appearance.diffsingerlangcodehide">在音素编辑器中隐藏语言前缀</system:String>
   <system:String x:Key="prefs.appearance.lang">语言</system:String>
+  <!--<system:String x:Key="prefs.appearance.notehoverglow">Note hover glow</system:String>-->
+  <system:String x:Key="prefs.appearance.notelyric">音符歌词</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.color">歌词颜色</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.font">歌词字体（逗号分隔，支持回退）</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.halign">水平对齐</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.halign.center">居中</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.halign.left">靠左</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.halign.right">靠右</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.italic">歌词斜体</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.scale">歌词缩放</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.valign">垂直对齐</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.valign.above">音符上方</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.valign.below">音符下方</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.valign.inside">音符内部</system:String>
+  <system:String x:Key="prefs.appearance.notelyric.weight">歌词字重</system:String>
+  <system:String x:Key="prefs.appearance.notestroke">音符描边</system:String>
+  <system:String x:Key="prefs.appearance.notestroke.rounded">音符圆角</system:String>
+  <system:String x:Key="prefs.appearance.notestroke.rounded.radius">圆角半径</system:String>
+  <system:String x:Key="prefs.appearance.notestroke.solid">实心音符</system:String>
+  <system:String x:Key="prefs.appearance.notestroke.thickness">描边粗细</system:String>
+  <system:String x:Key="prefs.appearance.pitchprediction">音高预测线</system:String>
+  <system:String x:Key="prefs.appearance.pitchprediction.thickness">线条粗细</system:String>
+  <!--<system:String x:Key="prefs.appearance.playbacknotebounce">Bounce notes on playback</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.playbacknotehighlight">Highlight notes on playback</system:String>-->
   <system:String x:Key="prefs.appearance.showghostnotes">在钢琴窗上显示其他音轨的音符</system:String>
   <system:String x:Key="prefs.appearance.showicon">在钢琴窗上显示歌手图标</system:String>
   <system:String x:Key="prefs.appearance.showportrait">在钢琴窗上显示歌手背景图</system:String>
   <system:String x:Key="prefs.appearance.sortorder">歌手名称显示语言</system:String>
+  <system:String x:Key="prefs.appearance.studioui">使用 Studio UI</system:String>
   <system:String x:Key="prefs.appearance.theme">主题</system:String>
   <system:String x:Key="prefs.appearance.theme.dark">暗</system:String>
   <system:String x:Key="prefs.appearance.theme.light">亮</system:String>
   <system:String x:Key="prefs.appearance.trackcolor">在界面上使用音轨颜色</system:String>
+  <system:String x:Key="prefs.appearance.waveform">钢琴窗波形</system:String>
+  <system:String x:Key="prefs.appearance.waveform.color">波形颜色</system:String>
+  <system:String x:Key="prefs.appearance.waveform.fadein">头部淡化长度</system:String>
+  <system:String x:Key="prefs.appearance.waveform.fadeout">尾部淡化长度</system:String>
+  <system:String x:Key="prefs.appearance.waveform.fill">波形填充</system:String>
+  <system:String x:Key="prefs.appearance.waveform.fixed.bottom">距编辑器底部</system:String>
+  <system:String x:Key="prefs.appearance.waveform.follow">跟随方式</system:String>
+  <system:String x:Key="prefs.appearance.waveform.follow.absolute">绝对定位</system:String>
+  <system:String x:Key="prefs.appearance.waveform.follow.smart">智能</system:String>
+  <system:String x:Key="prefs.appearance.waveform.gradient">渐变</system:String>
+  <system:String x:Key="prefs.appearance.waveform.layout">波形布局</system:String>
+  <system:String x:Key="prefs.appearance.waveform.layout.embed">嵌入</system:String>
+  <system:String x:Key="prefs.appearance.waveform.layout.fixed">固定</system:String>
+  <system:String x:Key="prefs.appearance.waveform.layout.follow">跟随</system:String>
+  <system:String x:Key="prefs.appearance.waveform.scale">波形缩放</system:String>
+  <system:String x:Key="prefs.appearance.waveform.solid">实心</system:String>
   <system:String x:Key="prefs.cache">缓存</system:String>
   <system:String x:Key="prefs.cache.clearonquit">退出时清空缓存</system:String>
   <system:String x:Key="prefs.cache.diffsingertensorcache">DiffSinger 张量缓存</system:String>
   <system:String x:Key="prefs.caption">使用偏好</system:String>
-  <system:String x:Key="prefs.diffsinger">DiffSinger</system:String>
+  <!--<system:String x:Key="prefs.channel">Release Channel</system:String>-->
+  <!--<system:String x:Key="prefs.channel.alpha">Alpha</system:String>-->
+  <!--<system:String x:Key="prefs.channel.beta">Beta</system:String>-->
+  <!--<system:String x:Key="prefs.channel.stable">Stable</system:String>-->
+  <!--<system:String x:Key="prefs.diffsinger">DiffSinger</system:String>-->
   <system:String x:Key="prefs.editing">编辑</system:String>
   <system:String x:Key="prefs.general">常规</system:String>
   <system:String x:Key="prefs.note.restart">注意: 修改本项后请重启OpenUtau</system:String>
@@ -627,7 +681,8 @@
   <system:String x:Key="prefs.playback.autoscrollmode.stationarycursor">固定播放标记</system:String>
   <system:String x:Key="prefs.playback.backend">音频后端</system:String>
   <system:String x:Key="prefs.playback.backend.auto">自动</system:String>
-  <system:String x:Key="prefs.playback.backend.mini">MiniAudio</system:String>
+  <!--<system:String x:Key="prefs.playback.backend.mini">MiniAudio</system:String>-->
+  <!--<system:String x:Key="prefs.playback.backend.sdl3">SDL 3</system:String>-->
   <system:String x:Key="prefs.playback.cursorposition">自动滚动边界</system:String>
   <system:String x:Key="prefs.playback.device">回放设备</system:String>
   <system:String x:Key="prefs.playback.lockstarttime">暂停时</system:String>
@@ -639,13 +694,13 @@
   <system:String x:Key="prefs.rendering">渲染</system:String>
   <system:String x:Key="prefs.rendering.defaultrenderer">传统音源的默认渲染器</system:String>
   <system:String x:Key="prefs.rendering.diffsingerdepth">DiffSinger 渲染深度</system:String>
+  <system:String x:Key="prefs.rendering.diffsingerpitchlocalretaking">DiffSinger 音高局部重录</system:String>
   <system:String x:Key="prefs.rendering.diffsingersteps">DiffSinger 声学渲染步数</system:String>
   <system:String x:Key="prefs.rendering.diffsingerstepspitch">DiffSinger 音高渲染步数</system:String>
   <system:String x:Key="prefs.rendering.diffsingerstepsvariance">DiffSinger 音色渲染步数</system:String>
   <system:String x:Key="prefs.rendering.diffsingervariancelocalpitchpatch">音高编辑时的 DiffSinger 局部音色更新</system:String>
   <system:String x:Key="prefs.rendering.gamebackend">GAME 推理后端</system:String>
-  <system:String x:Key="prefs.rendering.diffsingerpitchlocalretaking">DiffSinger 音高局部重录</system:String>
-  <system:String x:Key="prefs.rendering.onnxgpu">GPU</system:String>
+  <!--<system:String x:Key="prefs.rendering.onnxgpu">GPU</system:String>-->
   <system:String x:Key="prefs.rendering.onnxrunner">机器学习运行器</system:String>
   <system:String x:Key="prefs.rendering.phasecomp">相位修正</system:String>
   <system:String x:Key="prefs.rendering.prerender">预渲染</system:String>
@@ -664,8 +719,8 @@
     警告：渲染线程过多可能会导致OpenUtau运行缓慢
   </system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">最大渲染线程数</system:String>
-  <system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>
-  <system:String x:Key="prefs.utau">UTAU</system:String>
+  <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
+  <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->
 
   <system:String x:Key="progress.cachecleared">缓存已清除</system:String>
   <system:String x:Key="progress.clearingcache">正在清除缓存...</system:String>
@@ -771,6 +826,8 @@
   <system:String x:Key="singersetup.textfileencoding.prompt">请选择一种编码，使文件内容看起来是正确的。</system:String>
   <system:String x:Key="singersetup.title">歌手安装</system:String>
 
+  <!--<system:String x:Key="themeeditor.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="themeeditor.save">Save</system:String>-->
   <system:String x:Key="themeeditor.title">主题编辑器</system:String>
 
   <system:String x:Key="tip.aliasbox">手动选择别名</system:String>
@@ -836,7 +893,7 @@
 
   <system:String x:Key="updater.caption">检查更新</system:String>
   <system:String x:Key="updater.description">开放歌声合成平台</system:String>
-  <system:String x:Key="updater.github">GitHub</system:String>
+  <!--<system:String x:Key="updater.github">GitHub</system:String>-->
   <system:String x:Key="updater.status.available">有新更新 v{0} !</system:String>
   <system:String x:Key="updater.status.checking">检查更新中...</system:String>
   <system:String x:Key="updater.status.notavailable">已更新至最新</system:String>

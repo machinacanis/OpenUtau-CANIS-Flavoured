@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OpenUtau.App.Controls.AppearanceColorPicker"
+             x:Name="root">
+  <Grid ColumnDefinitions="*,8,Auto,8,Auto,4,Auto">
+    <ComboBox Grid.Column="0" SelectedIndex="{Binding Mode, ElementName=root}">
+      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.theme}"/>
+      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.accent}"/>
+      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.gray}"/>
+      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.light}"/>
+      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.dark}"/>
+      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.rgb}"/>
+    </ComboBox>
+    <TextBox Grid.Column="2"
+             MinWidth="110"
+             MaxWidth="140"
+             IsVisible="{Binding RgbVisible, ElementName=root}"
+             Text="{Binding Hex, ElementName=root}"
+             PlaceholderText="#RRGGBBAA"
+             FontFamily="monospace"/>
+    <TextBlock Grid.Column="4"
+               Text="{DynamicResource prefs.appearance.color.invert}"
+               VerticalAlignment="Center"/>
+    <ToggleSwitch Grid.Column="6"
+                  IsChecked="{Binding Invert, ElementName=root}"
+                  OnContent="{DynamicResource button.on}"
+                  OffContent="{DynamicResource button.off}"/>
+  </Grid>
+</UserControl>

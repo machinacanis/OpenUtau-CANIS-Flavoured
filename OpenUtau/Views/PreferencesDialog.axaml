@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:OpenUtau.App.ViewModels"
+        xmlns:c="using:OpenUtau.App.Controls"
         mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="460"
         x:Class="OpenUtau.App.Views.PreferencesDialog"
         Icon="/Assets/open-utau.ico"
@@ -248,6 +249,10 @@
               </Grid>
             </Button>
           </Grid>
+          <Grid Margin="0,10,0,0">
+            <TextBlock Text="{DynamicResource prefs.appearance.studioui}" HorizontalAlignment="Left"/>
+            <ToggleSwitch IsChecked="{Binding UseStudioUI}"/>
+          </Grid>
           <TextBlock Text="{DynamicResource prefs.appearance.degree}" Margin="0,10,0,0"/>
           <ComboBox SelectedIndex="{Binding DegreeStyle}">
             <ComboBoxItem Content="{DynamicResource prefs.appearance.degree.off}"/>
@@ -286,6 +291,112 @@
             <TextBlock Text="{DynamicResource prefs.appearance.detachpianoroll}" HorizontalAlignment="Left"/>
             <ToggleSwitch IsChecked="{Binding DetachPianoRoll}"/>
           </Grid>
+          <StackPanel IsVisible="{Binding UseStudioUI}">
+            <TextBlock Text="{DynamicResource prefs.appearance.waveform}" Margin="0,10,0,0" FontWeight="Bold"/>
+            <TextBlock Text="{DynamicResource prefs.appearance.waveform.layout}" Margin="0,10,0,0"/>
+            <ComboBox SelectedIndex="{Binding WaveformLayout}">
+              <ComboBoxItem Content="{DynamicResource prefs.appearance.waveform.layout.embed}"/>
+              <ComboBoxItem Content="{DynamicResource prefs.appearance.waveform.layout.follow}"/>
+              <ComboBoxItem Content="{DynamicResource prefs.appearance.waveform.layout.fixed}"/>
+            </ComboBox>
+            <StackPanel IsVisible="{Binding WaveformFollowOptionsVisible}">
+              <TextBlock Text="{DynamicResource prefs.appearance.waveform.follow}" Margin="0,10,0,0"/>
+              <ComboBox SelectedIndex="{Binding WaveformFollowMode}">
+                <ComboBoxItem Content="{DynamicResource prefs.appearance.waveform.follow.absolute}"/>
+                <ComboBoxItem Content="{DynamicResource prefs.appearance.waveform.follow.smart}"/>
+              </ComboBox>
+            </StackPanel>
+            <StackPanel IsVisible="{Binding WaveformFixedOptionsVisible}">
+              <Grid ColumnDefinitions="Auto,8,*" Margin="0,10,0,0">
+                <TextBlock Grid.Column="0" Text="{DynamicResource prefs.appearance.waveform.fixed.bottom}"/>
+                <c:UnboundedSlider Grid.Column="2" Value="{Binding WaveformFixedBottomPx}" Minimum="20" Maximum="400" TickFrequency="10"/>
+              </Grid>
+            </StackPanel>
+            <StackPanel IsVisible="{Binding WaveformFillOptionsVisible}">
+              <TextBlock Text="{DynamicResource prefs.appearance.waveform.fill}" Margin="0,10,0,0"/>
+              <ComboBox SelectedIndex="{Binding WaveformStyle}">
+                <ComboBoxItem Content="{DynamicResource prefs.appearance.waveform.gradient}"/>
+                <ComboBoxItem Content="{DynamicResource prefs.appearance.waveform.solid}"/>
+              </ComboBox>
+            </StackPanel>
+            <TextBlock Text="{DynamicResource prefs.appearance.waveform.color}" Margin="0,10,0,0"/>
+            <c:AppearanceColorPicker Mode="{Binding WaveformColorMode}"
+                                     Hex="{Binding WaveformColorHex}"
+                                     Invert="{Binding WaveformColorInvert}"/>
+            <Grid ColumnDefinitions="Auto,8,*" Margin="0,10,0,0">
+              <TextBlock Grid.Column="0" Text="{DynamicResource prefs.appearance.waveform.scale}"/>
+              <c:UnboundedSlider Grid.Column="2" Value="{Binding WaveformScalePercent}" Minimum="50" Maximum="300" TickFrequency="10"/>
+            </Grid>
+            <StackPanel IsVisible="{Binding WaveformGradientOptionsVisible}">
+              <Grid ColumnDefinitions="Auto,8,*" Margin="0,10,0,0">
+                <TextBlock Grid.Column="0" Text="{DynamicResource prefs.appearance.waveform.fadein}"/>
+                <c:UnboundedSlider Grid.Column="2" Value="{Binding WaveformFadeInMs}" Minimum="10" Maximum="300" TickFrequency="10"/>
+              </Grid>
+              <Grid ColumnDefinitions="Auto,8,*" Margin="0,10,0,0">
+                <TextBlock Grid.Column="0" Text="{DynamicResource prefs.appearance.waveform.fadeout}"/>
+                <c:UnboundedSlider Grid.Column="2" Value="{Binding WaveformFadeOutMs}" Minimum="10" Maximum="300" TickFrequency="10"/>
+              </Grid>
+            </StackPanel>
+            <TextBlock Text="{DynamicResource prefs.appearance.pitchprediction}" Margin="0,10,0,0" FontWeight="Bold"/>
+            <c:AppearanceColorPicker Mode="{Binding PitchPredictionColorMode}"
+                                     Hex="{Binding PitchPredictionColorHex}"
+                                     Invert="{Binding PitchPredictionColorInvert}"/>
+            <Grid ColumnDefinitions="Auto,8,*" Margin="0,10,0,0">
+              <TextBlock Grid.Column="0" Text="{DynamicResource prefs.appearance.pitchprediction.thickness}"/>
+              <c:UnboundedSlider Grid.Column="2" Value="{Binding PitchPredictionThickness}" Minimum="1" Maximum="4" TickFrequency="1"/>
+            </Grid>
+            <TextBlock Text="{DynamicResource prefs.appearance.notestroke}" Margin="0,10,0,0" FontWeight="Bold"/>
+            <c:AppearanceColorPicker Mode="{Binding NoteStrokeColorMode}"
+                                     Hex="{Binding NoteStrokeColorHex}"
+                                     Invert="{Binding NoteStrokeColorInvert}"/>
+            <Grid ColumnDefinitions="Auto,8,*" Margin="0,10,0,0">
+              <TextBlock Grid.Column="0" Text="{DynamicResource prefs.appearance.notestroke.thickness}"/>
+              <c:UnboundedSlider Grid.Column="2" Value="{Binding NoteStrokeThickness}" Minimum="1" Maximum="4" TickFrequency="1"/>
+            </Grid>
+            <Grid Margin="0,5,0,0">
+              <TextBlock Text="{DynamicResource prefs.appearance.notestroke.rounded}" HorizontalAlignment="Left"/>
+              <ToggleSwitch IsChecked="{Binding NoteRoundedCorners}"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,8,*" Margin="0,5,0,0" IsVisible="{Binding NoteCornerRadiusVisible}">
+              <TextBlock Grid.Column="0" Text="{DynamicResource prefs.appearance.notestroke.rounded.radius}"/>
+              <c:UnboundedSlider Grid.Column="2" Value="{Binding NoteCornerRadiusPx}" Minimum="1" Maximum="24" TickFrequency="1"/>
+            </Grid>
+            <Grid Margin="0,5,0,0">
+              <TextBlock Text="{DynamicResource prefs.appearance.notestroke.solid}" HorizontalAlignment="Left"/>
+              <ToggleSwitch IsChecked="{Binding NoteSolidFill}"/>
+            </Grid>
+            <TextBlock Text="{DynamicResource prefs.appearance.notelyric}" Margin="0,10,0,0" FontWeight="Bold"/>
+            <TextBlock Text="{DynamicResource prefs.appearance.notelyric.valign}" Margin="0,10,0,0"/>
+            <ComboBox SelectedIndex="{Binding NoteLyricVAlign}">
+              <ComboBoxItem Content="{DynamicResource prefs.appearance.notelyric.valign.above}"/>
+              <ComboBoxItem Content="{DynamicResource prefs.appearance.notelyric.valign.inside}"/>
+              <ComboBoxItem Content="{DynamicResource prefs.appearance.notelyric.valign.below}"/>
+            </ComboBox>
+            <TextBlock Text="{DynamicResource prefs.appearance.notelyric.halign}" Margin="0,10,0,0"/>
+            <ComboBox SelectedIndex="{Binding NoteLyricHAlign}" Margin="0,4,0,0">
+              <ComboBoxItem Content="{DynamicResource prefs.appearance.notelyric.halign.left}"/>
+              <ComboBoxItem Content="{DynamicResource prefs.appearance.notelyric.halign.center}"/>
+              <ComboBoxItem Content="{DynamicResource prefs.appearance.notelyric.halign.right}"/>
+            </ComboBox>
+            <TextBlock Text="{DynamicResource prefs.appearance.notelyric.font}" Margin="0,10,0,0"/>
+            <TextBox Text="{Binding NoteLyricFontFamily}" PlaceholderText="Noto Sans, Segoe UI"/>
+            <Grid ColumnDefinitions="Auto,8,*" Margin="0,10,0,0">
+              <TextBlock Grid.Column="0" Text="{DynamicResource prefs.appearance.notelyric.scale}"/>
+              <c:UnboundedSlider Grid.Column="2" Value="{Binding NoteLyricScalePercent}" Minimum="50" Maximum="300" TickFrequency="10"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,8,*" Margin="0,10,0,0">
+              <TextBlock Grid.Column="0" Text="{DynamicResource prefs.appearance.notelyric.weight}"/>
+              <c:UnboundedSlider Grid.Column="2" Value="{Binding NoteLyricWeight}" Minimum="100" Maximum="900" TickFrequency="100"/>
+            </Grid>
+            <Grid Margin="0,5,0,0">
+              <TextBlock Text="{DynamicResource prefs.appearance.notelyric.italic}" HorizontalAlignment="Left"/>
+              <ToggleSwitch IsChecked="{Binding NoteLyricItalic}"/>
+            </Grid>
+            <TextBlock Text="{DynamicResource prefs.appearance.notelyric.color}" Margin="0,10,0,0"/>
+            <c:AppearanceColorPicker Mode="{Binding NoteLyricColorMode}"
+                                     Hex="{Binding NoteLyricColorHex}"
+                                     Invert="{Binding NoteLyricColorInvert}"/>
+          </StackPanel>
         </StackPanel>
 
         <!-- UTAU -->
