@@ -396,9 +396,14 @@ Uwaga: ta opcja usuwa presety własne.</system:String>
   <system:String x:Key="notedefaults.vibrato.vollink">Połączenie z głośnością</system:String>
 
   <system:String x:Key="noteproperty">Właściwości nuty</system:String>
+  <!--<system:String x:Key="noteproperty.attack">Attack (ms)</system:String>-->
   <system:String x:Key="noteproperty.basic">Podstawowe</system:String>
+  <!--<system:String x:Key="noteproperty.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="noteproperty.overlap">Overlap (ms)</system:String>-->
   <!--<system:String x:Key="noteproperty.parent.phonemizer">Follows Parent Phonemizer</system:String>-->
   <!--<system:String x:Key="noteproperty.phonemizer">Phonemizer</system:String>-->
+  <!--<system:String x:Key="noteproperty.pre">Pre-utterance (ms)</system:String>-->
+  <!--<system:String x:Key="noteproperty.release">Release (ms)</system:String>-->
   <system:String x:Key="noteproperty.set">Ustaw</system:String>
   <system:String x:Key="noteproperty.setlongnote">Ustaw tylko na długich nutach</system:String>
   <system:String x:Key="noteproperty.tone">Ton</system:String>

@@ -396,9 +396,14 @@ Syntax: prefix,suffix</system:String>-->
   <system:String x:Key="notedefaults.vibrato.vollink">볼륨 연동</system:String>
 
   <system:String x:Key="noteproperty">노트 속성</system:String>
+  <!--<system:String x:Key="noteproperty.attack">Attack (ms)</system:String>-->
   <system:String x:Key="noteproperty.basic">기본</system:String>
+  <!--<system:String x:Key="noteproperty.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="noteproperty.overlap">Overlap (ms)</system:String>-->
   <!--<system:String x:Key="noteproperty.parent.phonemizer">Follows Parent Phonemizer</system:String>-->
   <!--<system:String x:Key="noteproperty.phonemizer">Phonemizer</system:String>-->
+  <!--<system:String x:Key="noteproperty.pre">Pre-utterance (ms)</system:String>-->
+  <!--<system:String x:Key="noteproperty.release">Release (ms)</system:String>-->
   <system:String x:Key="noteproperty.set">모든 노트에 적용</system:String>
   <system:String x:Key="noteproperty.setlongnote">긴 노트에만 적용</system:String>
   <system:String x:Key="noteproperty.tone">음조</system:String>

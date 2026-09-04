@@ -394,9 +394,14 @@ Uyarı: Bu seçenek özel önayarları kaldırır.</system:String>
   <system:String x:Key="notedefaults.vibrato.vollink">Ses Seviyesi ile Bağla</system:String>
 
   <system:String x:Key="noteproperty">Nota Özellikleri</system:String>
+  <!--<system:String x:Key="noteproperty.attack">Attack (ms)</system:String>-->
   <system:String x:Key="noteproperty.basic">Temel</system:String>
+  <!--<system:String x:Key="noteproperty.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="noteproperty.overlap">Overlap (ms)</system:String>-->
   <system:String x:Key="noteproperty.parent.phonemizer">Üst Phonemizer'ı takip et</system:String>
   <!--<system:String x:Key="noteproperty.phonemizer">Phonemizer</system:String>-->
+  <!--<system:String x:Key="noteproperty.pre">Pre-utterance (ms)</system:String>-->
+  <!--<system:String x:Key="noteproperty.release">Release (ms)</system:String>-->
   <system:String x:Key="noteproperty.set">Ayarla</system:String>
   <system:String x:Key="noteproperty.setlongnote">Yalnızca uzun notalarda uygula</system:String>
   <system:String x:Key="noteproperty.tone">Ton</system:String>

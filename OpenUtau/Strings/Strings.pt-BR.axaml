@@ -396,9 +396,14 @@ Aviso: esta opção remove predefinições personalizadas.</system:String>
   <system:String x:Key="notedefaults.vibrato.vollink">Link de Volume</system:String>
 
   <system:String x:Key="noteproperty">Propriedades da Nota</system:String>
+  <!--<system:String x:Key="noteproperty.attack">Attack (ms)</system:String>-->
   <system:String x:Key="noteproperty.basic">Básico</system:String>
+  <!--<system:String x:Key="noteproperty.cancel">Cancel</system:String>-->
+  <!--<system:String x:Key="noteproperty.overlap">Overlap (ms)</system:String>-->
   <!--<system:String x:Key="noteproperty.parent.phonemizer">Follows Parent Phonemizer</system:String>-->
   <!--<system:String x:Key="noteproperty.phonemizer">Phonemizer</system:String>-->
+  <!--<system:String x:Key="noteproperty.pre">Pre-utterance (ms)</system:String>-->
+  <!--<system:String x:Key="noteproperty.release">Release (ms)</system:String>-->
   <system:String x:Key="noteproperty.set">Definir</system:String>
   <system:String x:Key="noteproperty.setlongnote">Definir somente em notas longas</system:String>
   <system:String x:Key="noteproperty.tone">Tom</system:String>

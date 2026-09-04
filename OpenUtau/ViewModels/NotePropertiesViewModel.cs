@@ -22,6 +22,10 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public partial FontWeight TuningFontWeight { get; set; } = FontWeight.Normal;
         [Reactive] public partial float PortamentoLength { get; set; }
         [Reactive] public partial float PortamentoStart { get; set; }
+        [Reactive] public partial string PhonemePre { get; set; } = string.Empty;
+        [Reactive] public partial string PhonemeOverlap { get; set; } = string.Empty;
+        [Reactive] public partial string PhonemeAttack { get; set; } = string.Empty;
+        [Reactive] public partial string PhonemeRelease { get; set; } = string.Empty;
         [Reactive] public partial int PitchCurveShape { get; set; } = -1;
         [Reactive] public partial bool VibratoEnable { get; set; }
         [Reactive] public partial float VibratoLength { get; set; }
@@ -216,8 +220,33 @@ namespace OpenUtau.App.ViewModels {
             }
             AutoVibratoNoteLength = NotePresets.Default.AutoVibratoNoteDuration;
             AutoVibratoToggle = NotePresets.Default.AutoVibratoToggle;
+            LoadPhonemeTiming();
 
             AttachExpressions();
+        }
+
+        /// <summary>音符首个音素（父音符处理 Extends 展开）。</summary>
+        private UPhoneme? GetLeadingPhoneme(UNote note) {
+            if (Part == null) {
+                return null;
+            }
+            var owner = note.Extends ?? note;
+            return Part.phonemes.FirstOrDefault(p => p.Parent == owner);
+        }
+
+        /// <summary>四角：p0 前发音、p1 起始、p3 释放、p4 下一音素重叠。</summary>
+        private void LoadPhonemeTiming() {
+            var note = selectedNotes.FirstOrDefault();
+            var phoneme = note == null ? null : GetLeadingPhoneme(note);
+            if (phoneme == null) {
+                PhonemePre = PhonemeOverlap = PhonemeAttack = PhonemeRelease = string.Empty;
+                return;
+            }
+            PhonemePre = phoneme.preutter.ToString("0.#");
+            PhonemeAttack = (phoneme.envelope.data[1].X - phoneme.envelope.data[0].X).ToString("0.#");
+            PhonemeRelease = (phoneme.releaseTimeDelta ?? 0).ToString("0.#");
+            var ovl = phoneme.Next != null && phoneme.Next.adjacent ? phoneme.Next : null;
+            PhonemeOverlap = ovl != null ? ovl.overlap.ToString("0.#") : string.Empty;
         }
 
         public void LoadPart(UPart? part) {
@@ -413,6 +442,10 @@ namespace OpenUtau.App.ViewModels {
                     if (Part != null) {
                         DocManager.Inst.Project.Validate(new ValidateOptions { Part = Part });
                     }
+                } else if (cmd is PhonemePreutterCommand || cmd is PhonemeOverlapCommand
+                    || cmd is PhonemeAttackTimeCommand || cmd is PhonemeReleaseTimeCommand
+                    || cmd is ClearPhonemeTimingCommand) {
+                    LoadPhonemeTiming();
                 }
             } else if (cmd is ExpCommand) {
                 if (cmd is PitchExpCommand) {
@@ -513,6 +546,42 @@ namespace OpenUtau.App.ViewModels {
                     foreach (UNote note in selectedNotes) {
                         DocManager.Inst.ExecuteCmd(new ChangeNoteTuningCommand(Part, note, value));
                     }
+                } else if (tag is "PhonemePre" or "PhonemeOverlap" or "PhonemeAttack" or "PhonemeRelease") {
+                    if (obj is string s && double.TryParse(s, out double value)) {
+                        foreach (var owner in selectedNotes.Select(n => n.Extends ?? n).Distinct()) {
+                            var phoneme = Part.phonemes.FirstOrDefault(p => p.Parent == owner);
+                            if (phoneme == null || phoneme.Error) {
+                                continue;
+                            }
+                            // 面板输入为绝对 ms；ustx 存相对自动值的 delta（与拖拽编辑一致）
+                            switch (tag) {
+                                case "PhonemePre":
+                                    DocManager.Inst.ExecuteCmd(new PhonemePreutterCommand(
+                                        Part, owner, phoneme.index, phoneme,
+                                        (float)Math.Max(-(phoneme.oto?.Preutter ?? 0), value - phoneme.autoPreutter)));
+                                    break;
+                                case "PhonemeOverlap": {
+                                    var ovl = phoneme.Next;
+                                    if (ovl == null || !ovl.adjacent) {
+                                        break;
+                                    }
+                                    var ovlOwner = ovl.Parent.Extends ?? ovl.Parent;
+                                    DocManager.Inst.ExecuteCmd(new PhonemeOverlapCommand(
+                                        Part, ovlOwner, ovl.index, ovl, (float)(value - ovl.autoOverlap)));
+                                    break;
+                                }
+                                case "PhonemeAttack":
+                                    DocManager.Inst.ExecuteCmd(new PhonemeAttackTimeCommand(
+                                        Part, owner, phoneme.index, phoneme, (float)(value - phoneme.GetFadeIn())));
+                                    break;
+                                case "PhonemeRelease":
+                                    DocManager.Inst.ExecuteCmd(new PhonemeReleaseTimeCommand(
+                                        Part, owner, phoneme.index, phoneme, (float)value));
+                                    break;
+                            }
+                        }
+                    }
+                    LoadPhonemeTiming();
                 } else if (tag == "PortamentoLength" || tag == "PortamentoLength_TextBox") {
                     PortamentoLength = ParseValue(obj, tag, 2, 320, NotePresets.Default.DefaultPortamento.PortamentoLength);
                     foreach (var note in selectedNotes) {
