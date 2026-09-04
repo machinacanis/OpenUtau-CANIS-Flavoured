@@ -406,12 +406,7 @@ namespace OpenUtau.Core {
                     DocManager.Inst.ExecuteCmd(new ProgressBarNotification(0, $"Exporting to {exportPath}."));
 
                     CheckFileWritable(exportPath);
-                    var mixAdapter = new ExportAdapter(projectMix);
-                    if (UsesMonoRenderer(project)) {
-                        WaveFileWriter.CreateWaveFile16(exportPath, mixAdapter.ToMono(1, 0));
-                    } else {
-                        WaveFileWriter.CreateWaveFile16(exportPath, mixAdapter);
-                    }
+                    WaveFileWriter.CreateWaveFile16(exportPath, new ExportAdapter(projectMix));
                     DocManager.Inst.ExecuteCmd(new ProgressBarNotification(0, $"Exported to {exportPath}."));
                 } catch (IOException ioe) {
                     var customEx = new MessageCustomizableException($"Failed to export {exportPath}.", $"<translate:errors.failed.export>: {exportPath}", ioe);
@@ -452,19 +447,6 @@ namespace OpenUtau.Core {
                     DocManager.Inst.ExecuteCmd(new ErrorMessageNotification(customEx));
                     DocManager.Inst.ExecuteCmd(new ProgressBarNotification(0, $"Failed to render."));
                 }
-            });
-        }
-
-        static bool UsesMonoRenderer(UProject project) {
-            if (project?.tracks == null) {
-                return false;
-            }
-            return project.tracks.Any(track => {
-                var renderer = track.RendererSettings?.renderer;
-                return renderer == Renderers.HIFIUTAU
-                    || renderer == Renderers.CUSTOM_SERVER
-                    || renderer == "HIFIUTAU_LOCAL"
-                    || renderer == "HIFIUTAU_ONLINE";
             });
         }
 

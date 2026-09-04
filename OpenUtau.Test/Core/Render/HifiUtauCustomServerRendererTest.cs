@@ -233,6 +233,54 @@ namespace OpenUtau.Test.Core.Render {
                 Assert.Equal("a", json["phoneme_list"]["1"]["phoneme_name"].ToString());
                 Assert.Equal(12, (double)json["phoneme_list"]["1"]["Note_flags"]["stms"]);
             }
+
+            [Fact]
+            public void DefaultBrightness_IsSampledIntoPhraseAndJson() {
+                var hifi = PhraseFactory.Create();
+                Assert.NotNull(hifi.Render.warmth);
+                Assert.NotEmpty(hifi.Render.warmth);
+                var hifiJson = HifiUtauPhraseJson.Build(hifi.Render);
+                var hifiWarm = hifiJson["Dynamic_parameter"]["warm"];
+                Assert.NotNull(hifiWarm);
+                Assert.True(hifiWarm.HasValues);
+
+                var custom = PhraseFactory.Create(renderer: Renderers.CUSTOM_SERVER);
+                Assert.NotNull(custom.Render.warmth);
+                var customJson = CustomPhraseJson.Build(custom.Render);
+                var customWarm = customJson["Dynamic_parameter"]["warm"];
+                Assert.NotNull(customWarm);
+                Assert.True(customWarm.HasValues);
+            }
+        }
+
+        public class AudioResample {
+            [Fact]
+            public void Resample_AdvancesThroughSourceInsteadOfRepeatingTheStart() {
+                const int fromSr = 22050;
+                const int toSr = 44100;
+                var input = new float[fromSr];
+                int half = input.Length / 2;
+                for (int i = half; i < input.Length; i++) {
+                    input[i] = 1f;
+                }
+
+                var output = AudioReader.Resample(input, fromSr, toSr);
+                Assert.True(output.Length > input.Length);
+
+                int quarter = output.Length / 4;
+                float first = MeanAbs(output, 0, quarter);
+                float last = MeanAbs(output, output.Length - quarter, quarter);
+                Assert.True(first < 0.1f, $"first quarter should be near 0, got {first}");
+                Assert.True(last > 0.9f, $"last quarter should be near 1, got {last}");
+            }
+
+            static float MeanAbs(float[] samples, int start, int length) {
+                double sum = 0;
+                for (int i = 0; i < length; i++) {
+                    sum += Math.Abs(samples[start + i]);
+                }
+                return (float)(sum / length);
+            }
         }
 
         public class MelSplice {

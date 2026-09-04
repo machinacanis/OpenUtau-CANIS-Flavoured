@@ -63,7 +63,13 @@ namespace OpenUtau.App.Views {
                 Log.Information("Initialized OpenUtau.");
                 InitAudio();
                 if (Core.Util.Preferences.Default.HifiUtauPreload) {
-                    _ = Task.Run(() => Core.HiFiUtau.HiFiUtauModelStore.Inst.PreloadAll());
+                    _ = Task.Run(() => {
+                        try {
+                            Core.HiFiUtau.HiFiUtauModelStore.Inst.PreloadAll();
+                        } catch (Exception e) {
+                            Log.Error(e, "HiFiUTAU preload failed");
+                        }
+                    });
                 }
             }).ContinueWith(t => {
                 if (t.IsFaulted) {
