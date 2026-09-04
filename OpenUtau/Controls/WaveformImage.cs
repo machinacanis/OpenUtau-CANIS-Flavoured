@@ -1,12 +1,16 @@
-﻿using System;
-using System.Linq;
+using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
+using OpenUtau.App.Studio;
 using OpenUtau.App.ViewModels;
 using OpenUtau.Core;
+using OpenUtau.Core.Ustx;
+using OpenUtau.Core.Util;
 using ReactiveUI;
 using ReactiveUI.Primitives;
 using Serilog;
@@ -23,6 +27,16 @@ namespace OpenUtau.App.Controls {
                 nameof(TickOffset),
                 o => o.TickOffset,
                 (o, v) => o.TickOffset = v);
+        public static readonly DirectProperty<WaveformImage, double> TrackHeightProperty =
+            AvaloniaProperty.RegisterDirect<WaveformImage, double>(
+                nameof(TrackHeight),
+                o => o.TrackHeight,
+                (o, v) => o.TrackHeight = v);
+        public static readonly DirectProperty<WaveformImage, double> TrackOffsetProperty =
+            AvaloniaProperty.RegisterDirect<WaveformImage, double>(
+                nameof(TrackOffset),
+                o => o.TrackOffset,
+                (o, v) => o.TrackOffset = v);
         public static readonly DirectProperty<WaveformImage, bool> ShowWaveformProperty =
             AvaloniaProperty.RegisterDirect<WaveformImage, bool>(
                 nameof(ShowWaveform),
@@ -34,30 +48,82 @@ namespace OpenUtau.App.Controls {
             set => SetAndRaise(TickWidthProperty, ref tickWidth, value);
         }
         public double TickOffset {
-            get { return tickOffset; }
-            set { SetAndRaise(TickOffsetProperty, ref tickOffset, value); }
+            get => tickOffset;
+            set => SetAndRaise(TickOffsetProperty, ref tickOffset, value);
+        }
+        public double TrackHeight {
+            get => trackHeight;
+            set => SetAndRaise(TrackHeightProperty, ref trackHeight, value);
+        }
+        public double TrackOffset {
+            get => trackOffset;
+            set => SetAndRaise(TrackOffsetProperty, ref trackOffset, value);
         }
         public bool ShowWaveform {
-            get { return showWaveform; }
-            set { SetAndRaise(ShowWaveformProperty, ref showWaveform, value); }
+            get => showWaveform;
+            set => SetAndRaise(ShowWaveformProperty, ref showWaveform, value);
         }
 
         private double tickWidth;
         private double tickOffset;
+        private double trackHeight;
+        private double trackOffset;
         private bool showWaveform;
 
         private WriteableBitmap? bitmap;
-        private float[] sampleData = new float[0];
+        private float[] sampleData = Array.Empty<float>();
+        private float[] colMin = Array.Empty<float>();
+        private float[] colMax = Array.Empty<float>();
         private int sampleCount;
-        private int[] bitmapData = new int[0];
+        private int[] bitmapData = Array.Empty<int>();
+        private readonly DispatcherTimer refreshTimer;
         private DateTime mixUnlockTime = DateTime.MinValue;
         private bool wasRendering = false;
 
+        // ±1.0 spans AmpScaleRows pitch rows. Shared by embed, follow, and fixed
+        // so layout only moves the waveform, not its amplitude.
+        const double AmpScaleRows = 1.5;
+        // Follow layouts sit this many pitch rows below the note center.
+        const double FollowOffsetRows = 2.0;
+        // Candidate new shelf: this far from the group's running minimum.
+        const float SmartSplitDown = 2f;
+        const float SmartSplitUp = 2f;
+        // A leap/drop is a peak/valley (keep) if one of the next few notes
+        // returns this close to the old floor; otherwise it is a new shelf.
+        const float SmartReturnSlop = 1.5f;
+        const int SmartLookAhead = 2;
+        const double FallbackLeadMs = 80;
+        const int WaveformAlpha = 0xB0;
+        int waveformRgb = PackRgb(ThemeManager.WaveformColor);
+
         public WaveformImage() {
+            // 渲染过程中每个片段完成都会触发一次刷新，合并为 50ms 一次，
+            // 避免播放/预渲染时反复全量重画波形。
+            refreshTimer = new DispatcherTimer(
+                TimeSpan.FromMilliseconds(50),
+                DispatcherPriority.Background,
+                RefreshTimer_Tick);
             MessageBus.Current.Listen<WaveformRefreshEvent>()
                 .Subscribe(e => {
-                    InvalidateVisual();
+                    refreshTimer.Stop();
+                    refreshTimer.Start();
                 });
+            MessageBus.Current.Listen<ThemeChangedEvent>()
+                .Subscribe(_ => {
+                    waveformRgb = PackRgb(ThemeManager.WaveformColor);
+                    refreshTimer.Stop();
+                    refreshTimer.Start();
+                });
+            MessageBus.Current.Listen<StudioUIChangedEvent>()
+                .Subscribe(_ => {
+                    refreshTimer.Stop();
+                    refreshTimer.Start();
+                });
+        }
+
+        private void RefreshTimer_Tick(object? sender, EventArgs e) {
+            refreshTimer.Stop();
+            InvalidateVisual();
         }
 
         protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change) {
@@ -65,6 +131,8 @@ namespace OpenUtau.App.Controls {
             if (change.Property == DataContextProperty ||
                 change.Property == TickWidthProperty ||
                 change.Property == TickOffsetProperty ||
+                change.Property == TrackHeightProperty ||
+                change.Property == TrackOffsetProperty ||
                 change.Property == ShowWaveformProperty) {
                 InvalidateVisual();
             }
@@ -74,11 +142,15 @@ namespace OpenUtau.App.Controls {
             if (DataContext == null || double.IsNaN(((NotesViewModel)DataContext).TickOffset)) {
                 return;
             }
+            if (!ShowWaveform) {
+                base.Render(context);
+                return;
+            }
             var bitmap = GetBitmap();
             if (bitmap != null) {
                 Array.Clear(bitmapData, 0, bitmapData.Length);
                 var viewModel = (NotesViewModel?)DataContext;
-                if (viewModel != null && ShowWaveform &&
+                if (viewModel != null &&
                     viewModel.TickWidth > ViewConstants.PianoRollTickWidthShowDetails) {
                     var project = viewModel.Project;
                     var part = viewModel.Part;
@@ -87,46 +159,43 @@ namespace OpenUtau.App.Controls {
                         double rightMs = project.timeAxis.TickPosToMsPos(viewModel.TickOrigin + viewModel.TickOffset + viewModel.ViewportTicks);
                         int samplePos = (int)(leftMs * 44100 / 1000) * 2;
                         sampleCount = (int)((rightMs - leftMs) * 44100 / 1000) * 2;
-                        
+
                         if (sampleData.Length < sampleCount) {
                             Array.Resize(ref sampleData, sampleCount);
                         }
-                        
+
                         bool needsAnotherFrame = false;
                         Array.Clear(sampleData, 0, sampleData.Length);
-                        
+
                         if (OpenUtau.Core.PlaybackManager.Inst.IsWaveformBlanked) {
-                            // sampleData is already empty, so the screen draws a perfect flat line.
-                        }
-                        else if (OpenUtau.Core.PlaybackManager.Inst.StartingToPlay || part.Mix == null) {
+                            // sampleData is already empty
+                        } else if (OpenUtau.Core.PlaybackManager.Inst.StartingToPlay || part.Mix == null) {
                             foreach (var cacheItem in PlaybackManager.Inst.LiveWaveformCache.Values) {
                                 if (cacheItem.trackNo != part.trackNo) continue;
-                                
+
                                 double phraseStartMs = cacheItem.posMs;
                                 float[] phraseSamples = cacheItem.samples;
                                 int phraseStartSampleIdx = (int)((phraseStartMs - leftMs) * 44100 / 1000);
-                                
+
                                 double ageMs = (DateTime.Now - cacheItem.renderTime).TotalMilliseconds;
-                                double animProgress = Math.Clamp(ageMs / 300.0, 0.0, 1.0); 
-                                
-                                if (animProgress < 1.0) needsAnotherFrame = true; 
-                                
+                                double animProgress = Math.Clamp(ageMs / 300.0, 0.0, 1.0);
+
+                                if (animProgress < 1.0) needsAnotherFrame = true;
+
                                 float ease = 1.0f - (float)Math.Pow(1.0 - animProgress, 3);
-                                float visualScale = 1.0f * ease; 
-                                
+                                float visualScale = 1.0f * ease;
+
                                 int startJ = Math.Max(0, -phraseStartSampleIdx);
                                 int endJ = Math.Min(phraseSamples.Length, (sampleCount / 2) - phraseStartSampleIdx);
-                                
+
                                 for (int j = startJ; j < endJ; j++) {
-                                    int targetIdx = (phraseStartSampleIdx + j) * 2; 
+                                    int targetIdx = (phraseStartSampleIdx + j) * 2;
                                     float scaledSample = phraseSamples[j] * visualScale;
-                                    sampleData[targetIdx] += scaledSample;     
-                                    sampleData[targetIdx + 1] += scaledSample; 
+                                    sampleData[targetIdx] += scaledSample;
+                                    sampleData[targetIdx + 1] += scaledSample;
                                 }
                             }
-                        }
-                        // THE FINAL MIX 
-                        else {
+                        } else {
                             part.Mix.Mix(samplePos, sampleData, 0, sampleCount);
                         }
 
@@ -135,19 +204,28 @@ namespace OpenUtau.App.Controls {
                             mixUnlockTime = DateTime.Now;
                         }
                         wasRendering = isRendering;
-                        
+
                         double snapAgeMs = (DateTime.Now - mixUnlockTime).TotalMilliseconds;
                         double snapProgress = Math.Clamp(snapAgeMs / 300.0, 0.0, 1.0);
                         float snapEase = 1.0f - (float)Math.Pow(1.0 - snapProgress, 3);
 
                         if (snapProgress < 1.0) needsAnotherFrame = true;
 
+                        int drawWidth = Math.Min((int)Bounds.Width, bitmap.PixelSize.Width);
+                        int drawHeight = Math.Min((int)Bounds.Height, bitmap.PixelSize.Height);
+                        if (colMin.Length < drawWidth) {
+                            Array.Resize(ref colMin, drawWidth);
+                            Array.Resize(ref colMax, drawWidth);
+                        }
+                        Array.Clear(colMin, 0, drawWidth);
+                        Array.Clear(colMax, 0, drawWidth);
+
                         int startSample = 0;
-                        for (int i = 0; i < bitmap.PixelSize.Width; ++i) {
+                        for (int i = 0; i < drawWidth; ++i) {
                             double endTick = viewModel.TickOrigin + viewModel.TickOffset + (i + 1.0) / viewModel.TickWidth;
                             double endMs = project.timeAxis.TickPosToMsPos(endTick);
                             int endSample = Math.Clamp((int)((endMs - leftMs) * 44100 / 1000) * 2, 0, sampleCount);
-                            
+
                             if (endSample > startSample) {
                                 float rawMin = float.MaxValue;
                                 float rawMax = float.MinValue;
@@ -158,19 +236,69 @@ namespace OpenUtau.App.Controls {
                                 }
                                 if (rawMin == float.MaxValue) rawMin = 0;
                                 if (rawMax == float.MinValue) rawMax = 0;
-                                rawMin *= snapEase;
-                                rawMax *= snapEase;
-                                float min = 0.5f + rawMin * 0.5f;
-                                float max = 0.5f + rawMax * 0.5f;
-                                float yMax = Math.Clamp(max * bitmap.PixelSize.Height, 0, bitmap.PixelSize.Height - 1);
-                                float yMin = Math.Clamp(min * bitmap.PixelSize.Height, 0, bitmap.PixelSize.Height - 1);
-                                DrawPeak(bitmapData, bitmap.PixelSize.Width, i, (int)Math.Round(yMin), (int)Math.Round(yMax));
+                                colMin[i] = rawMin * snapEase;
+                                colMax[i] = rawMax * snapEase;
                             }
                             startSample = endSample;
                         }
 
+                        int layout = Preferences.Default.WaveformLayout;
+                        double scale = viewModel.TrackHeight * AmpScaleRows
+                            * (Math.Max(1, Preferences.Default.WaveformScalePercent) / 100.0);
+                        double leftTick = viewModel.TickOffset;
+                        double rightTick = viewModel.TickOffset + viewModel.ViewportTicks;
+                        if (!StudioUI.IsEnabled) {
+                            DrawClassicStrip(bitmapData, bitmap.PixelSize.Width, drawWidth, drawHeight);
+                        } else if (layout == 2) {
+                            DrawFixed(bitmapData, bitmap.PixelSize.Width, drawWidth, drawHeight, scale);
+                        } else if (layout == 1 && Preferences.Default.WaveformFollowMode == 1) {
+                            DrawFollowSmart(viewModel, project, part, bitmapData, bitmap.PixelSize.Width,
+                                drawWidth, drawHeight, scale, leftTick, rightTick);
+                        } else {
+                            bool followAbsolute = layout == 1;
+                            foreach (var note in part.notes) {
+                                NoteWaveRange(project, part, note, out int waveStart, out int waveEnd,
+                                    out bool fadeIn, out int fadeOutTicks);
+                                if (waveEnd < leftTick || waveStart > rightTick) {
+                                    continue;
+                                }
+                                int x0 = (int)Math.Floor((waveStart - viewModel.TickOffset) * viewModel.TickWidth);
+                                int x1 = (int)Math.Ceiling((waveEnd - viewModel.TickOffset) * viewModel.TickWidth);
+                                x0 = Math.Clamp(x0, 0, drawWidth);
+                                x1 = Math.Clamp(x1, 0, drawWidth);
+                                if (x1 <= x0) {
+                                    continue;
+                                }
+                                float tone = note.AdjustedTone - 0.5f;
+                                if (followAbsolute) {
+                                    tone -= (float)FollowOffsetRows;
+                                }
+                                double yCenter = viewModel.TickToneToPoint(note.position, tone).Y;
+                                double fadeInSpan = note.position - waveStart;
+                                for (int i = x0; i < x1; i++) {
+                                    if (colMin[i] == 0 && colMax[i] == 0) {
+                                        continue;
+                                    }
+                                    double tick = viewModel.TickOffset + i / viewModel.TickWidth;
+                                    float alpha = 1f;
+                                    if (fadeIn && fadeInSpan > 0 && tick < note.position) {
+                                        alpha = (float)Math.Clamp((tick - waveStart) / fadeInSpan, 0, 1);
+                                    }
+                                    if (fadeOutTicks > 0 && tick > note.End - fadeOutTicks) {
+                                        alpha *= (float)Math.Clamp((note.End - tick) / fadeOutTicks, 0, 1);
+                                    }
+                                    if (alpha <= 0) {
+                                        continue;
+                                    }
+                                    int y1 = (int)Math.Round(yCenter - colMax[i] * scale);
+                                    int y2 = (int)Math.Round(yCenter - colMin[i] * scale);
+                                    DrawPeak(bitmapData, bitmap.PixelSize.Width, drawHeight, i, y1, y2, alpha);
+                                }
+                            }
+                        }
+
                         if (needsAnotherFrame) {
-                            Avalonia.Threading.Dispatcher.UIThread.Post(InvalidateVisual, Avalonia.Threading.DispatcherPriority.Background);
+                            Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
                         }
                     }
                 }
@@ -191,7 +319,9 @@ namespace OpenUtau.App.Controls {
             if (desiredWidth == 0 || desiredHeight == 0) {
                 return null;
             }
-            if (bitmap == null || bitmap.Size.Width < desiredWidth) {
+            if (bitmap == null ||
+                bitmap.PixelSize.Width < desiredWidth ||
+                bitmap.PixelSize.Height < desiredHeight) {
                 bitmap?.Dispose();
                 var size = new PixelSize(desiredWidth, desiredHeight);
                 bitmap = new WriteableBitmap(
@@ -204,16 +334,267 @@ namespace OpenUtau.App.Controls {
             return bitmap;
         }
 
-        private void DrawPeak(int[] data, int width, int x, int y1, int y2) {
+        static UPhoneme? FirstPhoneme(UVoicePart part, UNote note) {
+            foreach (var ph in part.phonemes) {
+                if (ph.Parent == note) {
+                    return ph;
+                }
+            }
+            return null;
+        }
+
+        static UPhoneme? LastPhoneme(UVoicePart part, UNote note) {
+            UPhoneme? last = null;
+            foreach (var ph in part.phonemes) {
+                if (ph.Parent == note) {
+                    last = ph;
+                }
+            }
+            return last;
+        }
+
+
+        // Classic editor: 60px strip, 60px above the notes-canvas bottom.
+        void DrawClassicStrip(int[] data, int stride, int drawWidth, int drawHeight) {
+            const int stripHeight = 60;
+            const int marginBottom = 60;
             const int color = 0x7F7F7F7F;
+            int stripTop = Math.Max(0, drawHeight - marginBottom - stripHeight);
+            for (int i = 0; i < drawWidth; i++) {
+                if (colMin[i] == 0 && colMax[i] == 0) {
+                    continue;
+                }
+                float min = 0.5f + colMin[i] * 0.5f;
+                float max = 0.5f + colMax[i] * 0.5f;
+                int yMin = stripTop + (int)Math.Round(Math.Clamp(min * stripHeight, 0, stripHeight - 1));
+                int yMax = stripTop + (int)Math.Round(Math.Clamp(max * stripHeight, 0, stripHeight - 1));
+                if (yMin > yMax) {
+                    int temp = yMax;
+                    yMax = yMin;
+                    yMin = temp;
+                }
+                yMin = Math.Clamp(yMin, 0, drawHeight - 1);
+                yMax = Math.Clamp(yMax, 0, drawHeight - 1);
+                for (int y = yMin; y <= yMax; y++) {
+                    data[i + stride * y] = color;
+                }
+            }
+        }
+
+        // Studio fixed layout: one horizontal peak strip. Amplitude uses
+        // the same pixel scale as embed/follow; only the center line moves.
+        void DrawFixed(int[] data, int stride, int drawWidth, int drawHeight, double scale) {
+            int bottomPx = Math.Max(0, Preferences.Default.WaveformFixedBottomPx);
+            double yCenter = drawHeight - bottomPx;
+            for (int i = 0; i < drawWidth; i++) {
+                if (colMin[i] == 0 && colMax[i] == 0) {
+                    continue;
+                }
+                int y1 = (int)Math.Round(yCenter - colMax[i] * scale);
+                int y2 = (int)Math.Round(yCenter - colMin[i] * scale);
+                DrawPeak(data, stride, drawHeight, i, y1, y2, 1f);
+            }
+        }
+
+        void NoteWaveRange(UProject project, UVoicePart part, UNote note,
+            out int waveStart, out int waveEnd, out bool fadeIn, out int fadeOutTicks) {
+            bool adjPrev = note.Prev != null && note.Prev.End >= note.position;
+            bool adjNext = note.Next != null && note.End >= note.Next.position;
+            waveStart = note.position;
+            waveEnd = note.End;
+            fadeIn = false;
+            fadeOutTicks = 0;
+            if (!adjPrev) {
+                int lead = LeadTicks(project, part, note);
+                if (note.Prev != null) {
+                    lead = Math.Min(lead, Math.Max(0, note.position - note.Prev.End));
+                }
+                waveStart = note.position - lead;
+            }
+            if (!adjNext) {
+                int tail = TailTicks(project, part, note);
+                if (note.Next != null) {
+                    tail = Math.Min(tail, Math.Max(0, note.Next.position - note.End));
+                }
+                waveEnd = note.End + tail;
+            }
+            if (Preferences.Default.WaveformStyle == 0) {
+                if (adjPrev && note.Prev!.AdjustedTone != note.AdjustedTone) {
+                    int fadeInTicks = MsDeltaTicks(project, note.PositionMs, Math.Max(0, Preferences.Default.WaveformFadeInMs));
+                    waveStart = note.position - fadeInTicks;
+                    fadeIn = true;
+                }
+                if (adjNext && note.Next!.AdjustedTone != note.AdjustedTone) {
+                    fadeOutTicks = Math.Min(
+                        MsDeltaTicks(project, note.EndMs, Math.Max(0, Preferences.Default.WaveformFadeOutMs)),
+                        Math.Max(1, note.duration / 2));
+                }
+            }
+        }
+
+        // Connected notes form a phrase. Smart follow keeps a horizontal band
+        // under the group's lowest note. A 2-semitone drop or leap starts a
+        // new shelf unless a later connected note returns to the old floor.
+        void DrawFollowSmart(NotesViewModel viewModel, UProject project, UVoicePart part,
+            int[] data, int stride, int drawWidth, int drawHeight,
+            double scale, double leftTick, double rightTick) {
+            var notes = new List<UNote>(part.notes);
+            int i = 0;
+            while (i < notes.Count) {
+                int start = i;
+                float groupMin = notes[i].AdjustedTone;
+                i++;
+                while (i < notes.Count && notes[i - 1].End >= notes[i].position) {
+                    if (ShouldSplitSmart(notes, i, groupMin)) {
+                        break;
+                    }
+                    float tone = notes[i].AdjustedTone;
+                    if (tone < groupMin) {
+                        groupMin = tone;
+                    }
+                    i++;
+                }
+                DrawFollowGroup(viewModel, project, part, notes, start, i, groupMin,
+                    data, stride, drawWidth, drawHeight, scale, leftTick, rightTick);
+            }
+        }
+
+        static bool ReturnsToFloor(List<UNote> notes, int i, float groupMin) {
+            int seen = 0;
+            for (int j = i + 1;
+                j < notes.Count && notes[j - 1].End >= notes[j].position && seen < SmartLookAhead;
+                j++, seen++) {
+                if (notes[j].AdjustedTone <= groupMin + SmartReturnSlop) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static bool ShouldSplitSmart(List<UNote> notes, int i, float groupMin) {
+            float tone = notes[i].AdjustedTone;
+            if (tone <= groupMin - SmartSplitDown) {
+                return !ReturnsToFloor(notes, i, groupMin);
+            }
+            if (tone >= groupMin + SmartSplitUp) {
+                return !ReturnsToFloor(notes, i, groupMin);
+            }
+            return false;
+        }
+
+        void DrawFollowGroup(NotesViewModel viewModel, UProject project, UVoicePart part,
+            List<UNote> notes, int start, int end, float minTone,
+            int[] data, int stride, int drawWidth, int drawHeight,
+            double scale, double leftTick, double rightTick) {
+            float bandTone = minTone - 0.5f - (float)FollowOffsetRows;
+            bool gradient = Preferences.Default.WaveformStyle == 0;
+            bool splitPrev = start > 0 && notes[start - 1].End >= notes[start].position;
+            bool splitNext = end < notes.Count && notes[end - 1].End >= notes[end].position;
+            for (int n = start; n < end; n++) {
+                var note = notes[n];
+                NoteWaveRange(project, part, note, out int waveStart, out int waveEnd,
+                    out bool fadeIn, out int fadeOutTicks);
+                if (n > start) {
+                    waveStart = Math.Max(waveStart, note.position);
+                    fadeIn = false;
+                } else if (gradient && splitPrev) {
+                    int fadeInTicks = MsDeltaTicks(project, note.PositionMs,
+                        Math.Max(0, Preferences.Default.WaveformFadeInMs));
+                    waveStart = note.position - fadeInTicks;
+                    fadeIn = true;
+                }
+                if (n < end - 1) {
+                    waveEnd = Math.Min(waveEnd, note.End);
+                    fadeOutTicks = 0;
+                } else if (gradient && splitNext) {
+                    fadeOutTicks = Math.Min(
+                        MsDeltaTicks(project, note.EndMs, Math.Max(0, Preferences.Default.WaveformFadeOutMs)),
+                        Math.Max(1, note.duration / 2));
+                    waveEnd = Math.Min(waveEnd, note.End);
+                }
+                if (waveEnd < leftTick || waveStart > rightTick) {
+                    continue;
+                }
+                int x0 = (int)Math.Floor((waveStart - viewModel.TickOffset) * viewModel.TickWidth);
+                int x1 = (int)Math.Ceiling((waveEnd - viewModel.TickOffset) * viewModel.TickWidth);
+                x0 = Math.Clamp(x0, 0, drawWidth);
+                x1 = Math.Clamp(x1, 0, drawWidth);
+                if (x1 <= x0) {
+                    continue;
+                }
+                double yCenter = viewModel.TickToneToPoint(note.position, bandTone).Y;
+                double fadeInSpan = note.position - waveStart;
+                for (int x = x0; x < x1; x++) {
+                    if (colMin[x] == 0 && colMax[x] == 0) {
+                        continue;
+                    }
+                    double tick = viewModel.TickOffset + x / viewModel.TickWidth;
+                    float alpha = 1f;
+                    if (fadeIn && fadeInSpan > 0 && tick < note.position) {
+                        alpha = (float)Math.Clamp((tick - waveStart) / fadeInSpan, 0, 1);
+                    }
+                    if (fadeOutTicks > 0 && tick > note.End - fadeOutTicks) {
+                        alpha *= (float)Math.Clamp((note.End - tick) / fadeOutTicks, 0, 1);
+                    }
+                    if (alpha <= 0) {
+                        continue;
+                    }
+                    int y1 = (int)Math.Round(yCenter - colMax[x] * scale);
+                    int y2 = (int)Math.Round(yCenter - colMin[x] * scale);
+                    DrawPeak(data, stride, drawHeight, x, y1, y2, alpha);
+                }
+            }
+        }
+
+        static int LeadTicks(UProject project, UVoicePart part, UNote note) {
+            var first = FirstPhoneme(part, note);
+            if (first != null && first.preutter > 0) {
+                return MsDeltaTicks(project, first.PositionMs, first.preutter);
+            }
+            return MsDeltaTicks(project, note.PositionMs, FallbackLeadMs);
+        }
+
+        static int TailTicks(UProject project, UVoicePart part, UNote note) {
+            var last = LastPhoneme(part, note);
+            if (last != null && last.envelope.data.Count >= 5) {
+                int p4 = project.timeAxis.MsPosToTickPos(last.PositionMs + last.envelope.data[4].X) - part.position;
+                if (p4 > note.End) {
+                    return p4 - note.End;
+                }
+            }
+            return MsDeltaTicks(project, note.EndMs, FallbackLeadMs);
+        }
+
+
+        static int MsDeltaTicks(UProject project, double atMs, double deltaMs) {
+            return Math.Max(0, project.timeAxis.MsPosToTickPos(atMs) - project.timeAxis.MsPosToTickPos(atMs - deltaMs));
+        }
+
+        void DrawPeak(int[] data, int width, int height, int x, int y1, int y2, float alpha) {
+            if (x < 0 || x >= width || alpha <= 0) {
+                return;
+            }
             if (y1 > y2) {
                 int temp = y2;
                 y2 = y1;
                 y1 = temp;
             }
+            if (y2 < 0 || y1 >= height) {
+                return;
+            }
+            y1 = Math.Max(0, y1);
+            y2 = Math.Min(height - 1, y2);
+            int a = Math.Clamp((int)(WaveformAlpha * alpha), 0, 255);
+            int color = waveformRgb | (a << 24);
             for (var y = y1; y <= y2; ++y) {
                 data[x + width * y] = color;
             }
         }
+
+        static int PackRgb(Color color) {
+            // Rgba8888 little-endian: R, G, B, A
+            return color.R | (color.G << 8) | (color.B << 16);
+        }
     }
+
 }

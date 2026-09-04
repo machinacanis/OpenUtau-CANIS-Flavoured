@@ -11,6 +11,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using OpenUtau.App.Studio;
 using OpenUtau.App.ViewModels;
 using OpenUtau.App.Views;
 using OpenUtau.Core;
@@ -370,6 +371,60 @@ namespace OpenUtau.App.Controls {
         void OnHidePianoRoll(object sender, RoutedEventArgs args) {
             if (RootWindow.DataContext is MainWindowViewModel mwvm) {
                 mwvm.ShowPianoRoll = false;
+            }
+        }
+
+        Point? _panelDragOrigin;
+        double _panelDragTrackH, _panelDragPianoH;
+
+        void OnPanelDragPressed(object? sender, PointerPressedEventArgs args) {
+            if (!StudioUI.IsEnabled) {
+                return;
+            }
+            if (RootWindow is not MainWindow mw) {
+                return;
+            }
+            if (!args.GetCurrentPoint((Control)sender!).Properties.IsLeftButtonPressed) {
+                return;
+            }
+            var track = mw.MainPageGrid.RowDefinitions[2];
+            var piano = mw.MainPageGrid.RowDefinitions[4];
+            _panelDragOrigin = args.GetPosition(mw.MainPageGrid);
+            _panelDragTrackH = track.ActualHeight;
+            _panelDragPianoH = piano.ActualHeight;
+        }
+
+        void OnPanelDragMoved(object? sender, PointerEventArgs args) {
+            if (!StudioUI.IsEnabled || _panelDragOrigin is not { } origin || RootWindow is not MainWindow mw) {
+                return;
+            }
+            if (!args.GetCurrentPoint((Control)sender!).Properties.IsLeftButtonPressed) {
+                return;
+            }
+            var pos = args.GetPosition(mw.MainPageGrid);
+            if (Math.Abs(pos.Y - origin.Y) < 2 && args.Pointer.Captured == null) {
+                return;
+            }
+            args.Pointer.Capture((IInputElement)sender!);
+            var track = mw.MainPageGrid.RowDefinitions[2];
+            var piano = mw.MainPageGrid.RowDefinitions[4];
+            double total = _panelDragTrackH + _panelDragPianoH;
+            double minP = piano.MinHeight;
+            double maxP = double.IsPositiveInfinity(piano.MaxHeight) ? total - track.MinHeight : piano.MaxHeight;
+            double newP = Math.Clamp(_panelDragPianoH - (pos.Y - origin.Y), minP, Math.Max(minP, maxP));
+            double newT = total - newP;
+            if (newT < track.MinHeight) {
+                newT = track.MinHeight;
+                newP = total - newT;
+            }
+            track.Height = new GridLength(newT);
+            piano.Height = new GridLength(newP);
+        }
+
+        void OnPanelDragReleased(object? sender, PointerReleasedEventArgs args) {
+            _panelDragOrigin = null;
+            if (ReferenceEquals(args.Pointer.Captured, sender)) {
+                args.Pointer.Capture(null);
             }
         }
 

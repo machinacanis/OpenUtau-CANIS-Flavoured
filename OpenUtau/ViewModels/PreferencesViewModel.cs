@@ -13,6 +13,7 @@ using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 using ReactiveUI.Primitives;
 using ReactiveUI.Avalonia;
+using OpenUtau.App.Studio;
 using OpenUtau.Core.HiFiUtau;
 using OpenUtau.Core.Render;
 using Serilog;
@@ -113,6 +114,42 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public partial bool ShowPlaybackNoteHighlight { get; set; }
         [Reactive] public partial bool ShowPlaybackNoteBounce { get; set; }
         [Reactive] public partial bool DetachPianoRoll { get; set; }
+        [Reactive] public partial bool UseStudioUI { get; set; }
+        [Reactive] public partial int WaveformStyle { get; set; }
+        [Reactive] public partial int WaveformLayout { get; set; }
+        [Reactive] public partial int WaveformFollowMode { get; set; }
+        [Reactive] public partial int WaveformFadeInMs { get; set; }
+        [Reactive] public partial int WaveformFadeOutMs { get; set; }
+        [Reactive] public partial int WaveformColorMode { get; set; }
+        [Reactive] public partial string WaveformColorHex { get; set; }
+        [Reactive] public partial bool WaveformColorInvert { get; set; }
+        [Reactive] public partial int WaveformScalePercent { get; set; }
+        [Reactive] public partial int WaveformFixedBottomPx { get; set; }
+        [Reactive] public partial int NoteStrokeColorMode { get; set; }
+        [Reactive] public partial string NoteStrokeColorHex { get; set; }
+        [Reactive] public partial bool NoteStrokeColorInvert { get; set; }
+        [Reactive] public partial int NoteStrokeThickness { get; set; }
+        [Reactive] public partial int PitchPredictionColorMode { get; set; }
+        [Reactive] public partial string PitchPredictionColorHex { get; set; }
+        [Reactive] public partial bool PitchPredictionColorInvert { get; set; }
+        [Reactive] public partial int PitchPredictionThickness { get; set; }
+        [Reactive] public partial bool NoteRoundedCorners { get; set; }
+        [Reactive] public partial int NoteCornerRadiusPx { get; set; }
+        [Reactive] public partial bool NoteSolidFill { get; set; }
+        [Reactive] public partial int NoteLyricVAlign { get; set; }
+        [Reactive] public partial int NoteLyricHAlign { get; set; }
+        [Reactive] public partial string NoteLyricFontFamily { get; set; }
+        [Reactive] public partial int NoteLyricScalePercent { get; set; }
+        [Reactive] public partial int NoteLyricWeight { get; set; }
+        [Reactive] public partial bool NoteLyricItalic { get; set; }
+        [Reactive] public partial int NoteLyricColorMode { get; set; }
+        [Reactive] public partial string NoteLyricColorHex { get; set; }
+        [Reactive] public partial bool NoteLyricColorInvert { get; set; }
+        public bool WaveformGradientOptionsVisible => WaveformStyle == 0 && WaveformLayout != 2;
+        public bool WaveformFollowOptionsVisible => WaveformLayout == 1;
+        public bool WaveformFixedOptionsVisible => WaveformLayout == 2;
+        public bool WaveformFillOptionsVisible => WaveformLayout != 2;
+        public bool NoteCornerRadiusVisible => NoteRoundedCorners;
         [Reactive] public partial bool ThemeEditable { get; set; }
         public List<string> ThemeItems => ThemeManager.GetAvailableThemes();
         public bool IsThemeEditorOpen => Views.ThemeEditorWindow.IsOpen;
@@ -227,6 +264,37 @@ namespace OpenUtau.App.ViewModels {
             ShowPlaybackNoteHighlight = Preferences.Default.ShowPlaybackNoteHighlight;
             ShowPlaybackNoteBounce = Preferences.Default.ShowPlaybackNoteBounce;
             DetachPianoRoll = Preferences.Default.DetachPianoRoll;
+            UseStudioUI = Preferences.Default.UseStudioUI;
+            WaveformStyle = Preferences.Default.WaveformStyle;
+            WaveformLayout = Preferences.Default.WaveformLayout;
+            WaveformFollowMode = Preferences.Default.WaveformFollowMode;
+            WaveformFadeInMs = Preferences.Default.WaveformFadeInMs;
+            WaveformFadeOutMs = Preferences.Default.WaveformFadeOutMs;
+            WaveformColorMode = Preferences.Default.WaveformColorMode;
+            WaveformColorHex = Preferences.Default.WaveformColorHex;
+            WaveformColorInvert = Preferences.Default.WaveformColorInvert;
+            WaveformScalePercent = Preferences.Default.WaveformScalePercent;
+            WaveformFixedBottomPx = Preferences.Default.WaveformFixedBottomPx;
+            NoteStrokeColorMode = Preferences.Default.NoteStrokeColorMode;
+            NoteStrokeColorHex = Preferences.Default.NoteStrokeColorHex;
+            NoteStrokeColorInvert = Preferences.Default.NoteStrokeColorInvert;
+            NoteStrokeThickness = Preferences.Default.NoteStrokeThickness;
+            PitchPredictionColorMode = Preferences.Default.PitchPredictionColorMode;
+            PitchPredictionColorHex = Preferences.Default.PitchPredictionColorHex;
+            PitchPredictionColorInvert = Preferences.Default.PitchPredictionColorInvert;
+            PitchPredictionThickness = Preferences.Default.PitchPredictionThickness;
+            NoteRoundedCorners = Preferences.Default.NoteRoundedCorners;
+            NoteCornerRadiusPx = Preferences.Default.NoteCornerRadiusPx;
+            NoteSolidFill = Preferences.Default.NoteSolidFill;
+            NoteLyricVAlign = Preferences.Default.NoteLyricVAlign;
+            NoteLyricHAlign = Preferences.Default.NoteLyricHAlign;
+            NoteLyricFontFamily = Preferences.Default.NoteLyricFontFamily;
+            NoteLyricScalePercent = Preferences.Default.NoteLyricScalePercent;
+            NoteLyricWeight = Preferences.Default.NoteLyricWeight;
+            NoteLyricItalic = Preferences.Default.NoteLyricItalic;
+            NoteLyricColorMode = Preferences.Default.NoteLyricColorMode;
+            NoteLyricColorHex = Preferences.Default.NoteLyricColorHex;
+            NoteLyricColorInvert = Preferences.Default.NoteLyricColorInvert;
             Channel = Preferences.Default.Channel switch {
                 "beta" => 1,
                 "alpha" => 2,
@@ -319,12 +387,211 @@ namespace OpenUtau.App.ViewModels {
                 });
             this.WhenAnyValue(vm => vm.ThemeName)
                 .Subscribe(themeName => {
-                    ThemeEditable = themeName != "Light" && themeName != "Dark" && !Colors.CustomTheme.IsPackageTheme(themeName);
+                    ThemeEditable = !ThemeManager.IsBuiltIn(themeName) && !Colors.CustomTheme.IsPackageTheme(themeName);
                     if (!IsThemeEditorOpen) {
                         Preferences.Default.ThemeName = themeName;
                         Preferences.Save();
                         App.SetTheme();
                     }
+                });
+            this.WhenAnyValue(vm => vm.UseStudioUI)
+                .Subscribe(enabled => {
+                    Preferences.Default.UseStudioUI = enabled;
+                    if (StudioUI.EnsureClassicTheme() && ThemeName != Preferences.Default.ThemeName) {
+                        ThemeName = Preferences.Default.ThemeName;
+                    }
+                    Preferences.Save();
+                    this.RaisePropertyChanged(nameof(ThemeItems));
+                    App.SetTheme();
+                    StudioUI.NotifyChanged();
+                    MessageBus.Current.SendMessage(new WaveformRefreshEvent());
+                    MessageBus.Current.SendMessage(new NotesRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.WaveformStyle)
+                .Subscribe(style => {
+                    Preferences.Default.WaveformStyle = style;
+                    Preferences.Save();
+                    this.RaisePropertyChanged(nameof(WaveformGradientOptionsVisible));
+                    MessageBus.Current.SendMessage(new WaveformRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.WaveformLayout)
+                .Subscribe(layout => {
+                    Preferences.Default.WaveformLayout = layout;
+                    Preferences.Save();
+                    this.RaisePropertyChanged(nameof(WaveformFollowOptionsVisible));
+                    this.RaisePropertyChanged(nameof(WaveformFixedOptionsVisible));
+                    this.RaisePropertyChanged(nameof(WaveformFillOptionsVisible));
+                    this.RaisePropertyChanged(nameof(WaveformGradientOptionsVisible));
+                    MessageBus.Current.SendMessage(new WaveformRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.WaveformFollowMode)
+                .Subscribe(mode => {
+                    Preferences.Default.WaveformFollowMode = mode;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new WaveformRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.WaveformFadeInMs)
+                .Subscribe(ms => {
+                    Preferences.Default.WaveformFadeInMs = ms;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new WaveformRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.WaveformFadeOutMs)
+                .Subscribe(ms => {
+                    Preferences.Default.WaveformFadeOutMs = ms;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new WaveformRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.WaveformColorMode)
+                .Subscribe(_ => {
+                    Preferences.Default.WaveformColorMode = WaveformColorMode;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.WaveformColorHex)
+                .Subscribe(hex => {
+                    Preferences.Default.WaveformColorHex = hex ?? string.Empty;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.WaveformColorInvert)
+                .Subscribe(invert => {
+                    Preferences.Default.WaveformColorInvert = invert;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.WaveformScalePercent)
+                .Subscribe(percent => {
+                    Preferences.Default.WaveformScalePercent = percent;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new WaveformRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.WaveformFixedBottomPx)
+                .Subscribe(px => {
+                    Preferences.Default.WaveformFixedBottomPx = px;
+                    Preferences.Save();
+                    MessageBus.Current.SendMessage(new WaveformRefreshEvent());
+                });
+            this.WhenAnyValue(vm => vm.NoteStrokeColorMode)
+                .Subscribe(_ => {
+                    Preferences.Default.NoteStrokeColorMode = NoteStrokeColorMode;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteStrokeColorHex)
+                .Subscribe(hex => {
+                    Preferences.Default.NoteStrokeColorHex = hex ?? string.Empty;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteStrokeColorInvert)
+                .Subscribe(invert => {
+                    Preferences.Default.NoteStrokeColorInvert = invert;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteStrokeThickness)
+                .Subscribe(thickness => {
+                    Preferences.Default.NoteStrokeThickness = thickness;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.PitchPredictionColorMode)
+                .Subscribe(_ => {
+                    Preferences.Default.PitchPredictionColorMode = PitchPredictionColorMode;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.PitchPredictionColorHex)
+                .Subscribe(hex => {
+                    Preferences.Default.PitchPredictionColorHex = hex ?? string.Empty;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.PitchPredictionColorInvert)
+                .Subscribe(invert => {
+                    Preferences.Default.PitchPredictionColorInvert = invert;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.PitchPredictionThickness)
+                .Subscribe(thickness => {
+                    Preferences.Default.PitchPredictionThickness = thickness;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteRoundedCorners)
+                .Subscribe(rounded => {
+                    Preferences.Default.NoteRoundedCorners = rounded;
+                    Preferences.Save();
+                    this.RaisePropertyChanged(nameof(NoteCornerRadiusVisible));
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteCornerRadiusPx)
+                .Subscribe(px => {
+                    Preferences.Default.NoteCornerRadiusPx = px;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteSolidFill)
+                .Subscribe(solid => {
+                    Preferences.Default.NoteSolidFill = solid;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteLyricVAlign)
+                .Subscribe(align => {
+                    Preferences.Default.NoteLyricVAlign = align;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteLyricHAlign)
+                .Subscribe(align => {
+                    Preferences.Default.NoteLyricHAlign = align;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteLyricFontFamily)
+                .Subscribe(family => {
+                    Preferences.Default.NoteLyricFontFamily = family ?? string.Empty;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteLyricScalePercent)
+                .Subscribe(percent => {
+                    Preferences.Default.NoteLyricScalePercent = percent;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteLyricWeight)
+                .Subscribe(weight => {
+                    Preferences.Default.NoteLyricWeight = weight;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteLyricItalic)
+                .Subscribe(italic => {
+                    Preferences.Default.NoteLyricItalic = italic;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteLyricColorMode)
+                .Subscribe(_ => {
+                    Preferences.Default.NoteLyricColorMode = NoteLyricColorMode;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteLyricColorHex)
+                .Subscribe(hex => {
+                    Preferences.Default.NoteLyricColorHex = hex ?? string.Empty;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
+                });
+            this.WhenAnyValue(vm => vm.NoteLyricColorInvert)
+                .Subscribe(invert => {
+                    Preferences.Default.NoteLyricColorInvert = invert;
+                    Preferences.Save();
+                    ThemeManager.ApplyPianoRollStyle();
                 });
             this.WhenAnyValue(vm => vm.DegreeStyle)
                 .Subscribe(degreeStyle => {

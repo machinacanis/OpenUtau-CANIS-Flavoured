@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="OpenUtau.App.Controls.UnboundedSlider"
+             x:Name="root">
+  <Grid ColumnDefinitions="*,8,64">
+    <Slider Name="Slider"
+            Grid.Column="0"
+            Classes="fader"
+            Minimum="{Binding Minimum, ElementName=root}"
+            Maximum="{Binding Maximum, ElementName=root}"
+            TickFrequency="{Binding TickFrequency, ElementName=root}"
+            IsSnapToTickEnabled="{Binding IsSnapToTickEnabled, ElementName=root}"
+            TickPlacement="BottomRight"
+            Tag="{Binding Tag, ElementName=root}"
+            IsEnabled="{Binding $parent[UserControl].IsEnabled}"/>
+    <TextBox Name="Editor"
+             Grid.Column="2"
+             MinWidth="56"
+             Padding="4,2"
+             TextAlignment="Right"
+             VerticalAlignment="Center"
+             IsEnabled="{Binding $parent[UserControl].IsEnabled}"/>
+  </Grid>
+</UserControl>

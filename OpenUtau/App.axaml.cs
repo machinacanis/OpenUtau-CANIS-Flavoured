@@ -7,7 +7,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
+using OpenUtau.App.Studio;
 using OpenUtau.App.Views;
 using OpenUtau.Colors;
 using Serilog;
@@ -95,20 +97,33 @@ namespace OpenUtau.App {
             Log.Information("Initialized theme.");
         }
 
+        static IStyle? studioStyles;
+
         public static void SetTheme() {
             if (Current == null) {
                 return;
             }
+            StudioUI.EnsureClassicTheme();
             var light = (IResourceDictionary) Current.Resources["themes-light"]!;
             var dark = (IResourceDictionary) Current.Resources["themes-dark"]!;
             var custom = (IResourceDictionary) Current.Resources["themes-custom"]!;
-            switch (Core.Util.Preferences.Default.ThemeName) { 
+            var warmSage = (IResourceDictionary) Current.Resources["themes-warmsage"]!;
+            var studio = (IResourceDictionary) Current.Resources["themes-studio"]!;
+            switch (Core.Util.Preferences.Default.ThemeName) {
                 case "Light":
                     ApplyTheme(light);
                     Current.RequestedThemeVariant = ThemeVariant.Light;
                     break;
                 case "Dark":
                     ApplyTheme(dark);
+                    Current.RequestedThemeVariant = ThemeVariant.Dark;
+                    break;
+                case "WarmSage":
+                    ApplyTheme(warmSage);
+                    Current.RequestedThemeVariant = ThemeVariant.Dark;
+                    break;
+                case "Studio":
+                    ApplyTheme(studio);
                     Current.RequestedThemeVariant = ThemeVariant.Dark;
                     break;
                 default:
@@ -121,7 +136,20 @@ namespace OpenUtau.App {
                     }
                     break;
             }
+            ApplyStudioStyles(StudioUI.IsEnabled);
             ThemeManager.LoadTheme();
+        }
+
+        static void ApplyStudioStyles(bool enable) {
+            studioStyles ??= new StyleInclude(new Uri("avares://OpenUtau/App.axaml")) {
+                Source = new Uri("avares://OpenUtau/Styles/StudioStyles.axaml")
+            };
+            bool present = Current!.Styles.Contains(studioStyles);
+            if (enable && !present) {
+                Current.Styles.Add(studioStyles);
+            } else if (!enable && present) {
+                Current.Styles.Remove(studioStyles);
+            }
         }
 
         private static void ApplyTheme(IResourceDictionary resDict) { 

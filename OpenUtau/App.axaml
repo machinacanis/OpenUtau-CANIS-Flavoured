@@ -29,6 +29,8 @@
       <ResourceInclude x:Key="themes-dark" Source="/Colors/DarkTheme.axaml"/>
       <ResourceInclude x:Key="themes-light" Source="/Colors/LightTheme.axaml"/>
       <ResourceInclude x:Key="themes-custom" Source="/Colors/CustomTheme.axaml"/>
+      <ResourceInclude x:Key="themes-warmsage" Source="/Colors/WarmSageTheme.axaml"/>
+      <ResourceInclude x:Key="themes-studio" Source="/Colors/StudioTheme.axaml"/>
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="/Colors/Brushes.axaml"/>
       </ResourceDictionary.MergedDictionaries>

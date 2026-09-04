@@ -492,4 +492,8 @@
     <Setter Property="Margin" Value="0"/>
   </Style>
 
+  <Style Selector="GridSplitter.panel">
+    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+  </Style>
+
 </Styles>
