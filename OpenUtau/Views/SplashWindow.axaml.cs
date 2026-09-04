@@ -62,6 +62,15 @@ namespace OpenUtau.App.Views {
                 DocManager.Inst.PostOnUIThread = action => Avalonia.Threading.Dispatcher.UIThread.Post(action);
                 Log.Information("Initialized OpenUtau.");
                 InitAudio();
+                if (Core.Util.Preferences.Default.HifiUtauPreload) {
+                    _ = Task.Run(() => {
+                        try {
+                            Core.HiFiUtau.HiFiUtauModelStore.Inst.PreloadAll();
+                        } catch (Exception e) {
+                            Log.Error(e, "HiFiUTAU preload failed");
+                        }
+                    });
+                }
             }).ContinueWith(t => {
                 if (t.IsFaulted) {
                     Log.Error(t.Exception?.Flatten(), "Failed to Start.");

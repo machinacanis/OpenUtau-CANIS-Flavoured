@@ -76,6 +76,12 @@ namespace OpenUtau.Core.Render {
         // voicevox & enunu args
         public readonly int toneShift;
 
+        // HiFiUTAU / Custom Server note-level options
+        public readonly int phonemeType;
+        public readonly int stretchMode;
+        public readonly int spliceMode;
+        public readonly float stretchMs;
+
         public readonly UOto oto;
         public readonly UOto oto2;
         public readonly ulong hash;
@@ -134,6 +140,14 @@ namespace OpenUtau.Core.Render {
             envelope = phoneme.envelope.data.ToArray();
             direct = phoneme.GetExpression(project, track, Format.Ustx.DIR).Item1 == 1;
             toneShift = (int)phoneme.GetExpression(project, track, Format.Ustx.SHFT).Item1;
+            phonemeType = track.TryGetExpDescriptor(project, Format.Ustx.PHTP, out _)
+                ? (int)phoneme.GetExpression(project, track, Format.Ustx.PHTP).Item1 : 0;
+            stretchMode = track.TryGetExpDescriptor(project, Format.Ustx.STRT, out _)
+                ? (int)phoneme.GetExpression(project, track, Format.Ustx.STRT).Item1 : 0;
+            spliceMode = track.TryGetExpDescriptor(project, Format.Ustx.SPLC, out _)
+                ? (int)phoneme.GetExpression(project, track, Format.Ustx.SPLC).Item1 : 0;
+            stretchMs = track.TryGetExpDescriptor(project, Format.Ustx.STMS, out _)
+                ? phoneme.GetExpression(project, track, Format.Ustx.STMS).Item1 : 0;
 
             oto = phoneme.oto;
             if (oto != null && !string.IsNullOrEmpty(targetColor)) {
@@ -151,6 +165,10 @@ namespace OpenUtau.Core.Render {
                     writer.Write(duration);
                     writer.Write(phoneme ?? string.Empty);
                     writer.Write(tone);
+                    writer.Write(phonemeType);
+                    writer.Write(stretchMode);
+                    writer.Write(spliceMode);
+                    writer.Write(stretchMs);
 
                     writer.Write(resampler ?? string.Empty);
                     foreach (var flag in flags) {
@@ -204,6 +222,11 @@ namespace OpenUtau.Core.Render {
         public readonly float[] tension;
         public readonly float[] voicing;
         public readonly float[] xsy;
+        public readonly float[] lowcut;
+        public readonly float[] warmth;
+        public readonly float[] hcmp;
+        public readonly float[] breathLow;
+        public readonly float[] breathHigh;
         public readonly Tuple<string, float[]>[] curves;//custom curves defined by renderer
         public readonly ulong preEffectHash;
         public readonly ulong hash;
@@ -472,6 +495,11 @@ namespace OpenUtau.Core.Render {
                             }
                         }
                         break;
+                    case Format.Ustx.LOWC: lowcut = curveSampled; break;
+                    case Format.Ustx.WARM: warmth = curveSampled; break;
+                    case Format.Ustx.HCMP: hcmp = curveSampled; break;
+                    case Format.Ustx.BREL: breathLow = curveSampled; break;
+                    case Format.Ustx.BREH: breathHigh = curveSampled; break;
                     default:
                         curves.Add(Tuple.Create(curve.abbr,curveSampled));
                         break;
@@ -528,7 +556,7 @@ namespace OpenUtau.Core.Render {
                         writer.Write(phone.hash);
                     }
                     if (postEffect) {
-                        foreach (var array in new float[][] { pitches, dynamics, gender, breathiness, toneShift, tension, voicing, xsy }) {
+                        foreach (var array in new float[][] { pitches, dynamics, gender, breathiness, toneShift, tension, voicing, xsy, lowcut, warmth, hcmp, breathLow, breathHigh }) {
                             if (array == null) {
                                 writer.Write("null");
                             } else {
