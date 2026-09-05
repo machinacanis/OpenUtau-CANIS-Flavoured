@@ -127,6 +127,18 @@ Native：`cd cpp && bazelisk build //worldline`。
 - **不提交**：个人 `prefs.json`、音源、`bin/`/`obj/`、调试残留。`runtimes/` 里的 worldline 二进制只在正式重建后更新。
 - **许可**：MIT（Copyright StAkira）。改文件时保留原版权头。
 
+## Merge logging（上游合并记录）
+
+与上游 `openutau/OpenUtau` 同步并尝试合并冲突代码时，合并结束后必须在仓库根目录 `MERGE_LOG.md` 追加一条记录（无冲突的同步也记录，标注"无冲突"）。这是本 fork 的强制共识，AI agent 与人工合并一视同仁，目的：保证合并行为可溯源。
+
+1. **记录时机**：合并结束（含验证完成）后立即写，随该次合并提交一起提交。
+2. **必写内容**：
+   - 日期时间（ISO 8601，UTC）与合并的上游基线（完整 SHA + 一句话主题）；
+   - 本次引入的上游 commit 列表；
+   - 冲突来源：每个冲突文件分别来自哪两个 commit（fork 侧 / 上游侧，完整 SHA + 主题）；
+   - 决策记录：逐条说明每个冲突做了什么决策、为什么（保留哪边 / 合并哪边 / 如何组合），以及验证方式与结果（构建、测试、`Misc/sync_strings.py` 同步结果）。
+3. **可读性**：每条记录是独立的 `## Merge YYYY-MM-DD <上游SHA前8位>` 块，块间用 `---` 分隔，按时间顺序追加在文件末尾，不改写历史记录。
+
 ## Branches
 
 `master` 是 integration branch（不是 `main`），只接收已完成的 topic 合并。产品改动在 topic branch 上做：一个主题一条分支。流程是 GitHub Flow，不是 Git Flow：没有 `develop` / `release/*`。
