@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -217,6 +217,12 @@ namespace OpenUtau.Core.Util {
             /// editor layout. Classic editing is unchanged while this is false.
             /// </summary>
             public bool UseStudioUI = false;
+            /// <summary>
+            /// Active Studio UI preset name. Presets are YAML files in
+            /// <c>DataPath/Presets</c>; switching one overwrites the Studio UI
+            /// appearance settings below with the preset's values.
+            /// </summary>
+            public string StudioPreset = "Studio Dark";
             public EditTool EditTool = new EditTool();
             public bool PlayTone = true;
             /// <summary>Legacy; migrated to <see cref="RealTimePitchMode"/> on load.</summary>
@@ -245,7 +251,7 @@ namespace OpenUtau.Core.Util {
             public string PitchPredictionColorHex = "#FFFFFFFF";
             public bool PitchPredictionColorInvert = true;
             public int PitchPredictionThickness = 2;
-            public bool NoteRoundedCorners = false;
+            public bool NoteRoundedCorners = true;
             public int NoteCornerRadiusPx = 5;
             public bool NoteSolidFill = false;
             public int NoteLyricVAlign = 2; // 0 = above, 1 = inside, 2 = below

@@ -598,11 +598,11 @@ Segure Ctrl para selecionar</system:String>
   <!--<system:String x:Key="prefs.advanced.winepath">Wine Path (set to enable wine for compatibility)</system:String>-->
   <system:String x:Key="prefs.appearance">Aparência</system:String>
   <!--<system:String x:Key="prefs.appearance.color.accent">Accent</system:String>-->
-  <!--<system:String x:Key="prefs.appearance.color.dark">Dark text</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.emphasis">Emphasis text</system:String>-->
   <!--<system:String x:Key="prefs.appearance.color.gray">Gray</system:String>-->
   <!--<system:String x:Key="prefs.appearance.color.invert">Invert</system:String>-->
-  <!--<system:String x:Key="prefs.appearance.color.light">Light text</system:String>-->
   <!--<system:String x:Key="prefs.appearance.color.rgb">RGB</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.text">Text</system:String>-->
   <!--<system:String x:Key="prefs.appearance.color.theme">Theme</system:String>-->
   <!--<system:String x:Key="prefs.appearance.customtheme.create.empty">Theme name cannot be empty.</system:String>-->
   <!--<system:String x:Key="prefs.appearance.customtheme.create.prompt">Enter Theme Name</system:String>-->
@@ -757,6 +757,13 @@ HN-SEP model: {3} ({4})</system:String>-->
   </system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Máximo de threads de renderização</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
+  <!--<system:String x:Key="prefs.studioui">Studio UI</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.disabled.hint">Enable Studio UI in Appearance to configure Studio UI settings.</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.preset">Preset</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.save">Save preset</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.save.empty">Preset name cannot be empty.</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.save.prompt">Preset name</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.save.title">Save Studio UI preset</system:String>-->
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->
 
   <system:String x:Key="progress.cachecleared">Cache limpo.</system:String>

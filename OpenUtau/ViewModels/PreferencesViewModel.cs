@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -114,7 +114,50 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public partial bool ShowPlaybackNoteHighlight { get; set; }
         [Reactive] public partial bool ShowPlaybackNoteBounce { get; set; }
         [Reactive] public partial bool DetachPianoRoll { get; set; }
+        [Reactive] public partial bool ThemeEditable { get; set; }
+        public List<string> ThemeItems => ThemeManager.GetAvailableThemes();
+        public bool IsThemeEditorOpen => Views.ThemeEditorWindow.IsOpen;
+        public bool ThemeSelectionEnabled => !IsThemeEditorOpen && !UseStudioUI;
+
+        // Studio UI
         [Reactive] public partial bool UseStudioUI { get; set; }
+        [Reactive] public partial string CurrentPreset { get; set; } = string.Empty;
+        [Reactive] public partial string SelectedPresetItem { get; set; } = string.Empty;
+        public List<string> PresetItems { get; private set; } = new();
+        public bool PresetDirty { get; private set; }
+        bool _applyingPreset;
+        static readonly HashSet<string> PresetUiPropertyNames = new(StringComparer.Ordinal) {
+            nameof(WaveformStyle),
+            nameof(WaveformLayout),
+            nameof(WaveformFollowMode),
+            nameof(WaveformFadeInMs),
+            nameof(WaveformFadeOutMs),
+            nameof(WaveformColorMode),
+            nameof(WaveformColorHex),
+            nameof(WaveformColorInvert),
+            nameof(WaveformScalePercent),
+            nameof(WaveformFixedBottomPx),
+            nameof(NoteStrokeColorMode),
+            nameof(NoteStrokeColorHex),
+            nameof(NoteStrokeColorInvert),
+            nameof(NoteStrokeThickness),
+            nameof(PitchPredictionColorMode),
+            nameof(PitchPredictionColorHex),
+            nameof(PitchPredictionColorInvert),
+            nameof(PitchPredictionThickness),
+            nameof(NoteRoundedCorners),
+            nameof(NoteCornerRadiusPx),
+            nameof(NoteSolidFill),
+            nameof(NoteLyricVAlign),
+            nameof(NoteLyricHAlign),
+            nameof(NoteLyricFontFamily),
+            nameof(NoteLyricScalePercent),
+            nameof(NoteLyricWeight),
+            nameof(NoteLyricItalic),
+            nameof(NoteLyricColorMode),
+            nameof(NoteLyricColorHex),
+            nameof(NoteLyricColorInvert),
+        };
         [Reactive] public partial int WaveformStyle { get; set; }
         [Reactive] public partial int WaveformLayout { get; set; }
         [Reactive] public partial int WaveformFollowMode { get; set; }
@@ -150,9 +193,6 @@ namespace OpenUtau.App.ViewModels {
         public bool WaveformFixedOptionsVisible => WaveformLayout == 2;
         public bool WaveformFillOptionsVisible => WaveformLayout != 2;
         public bool NoteCornerRadiusVisible => NoteRoundedCorners;
-        [Reactive] public partial bool ThemeEditable { get; set; }
-        public List<string> ThemeItems => ThemeManager.GetAvailableThemes();
-        public bool IsThemeEditorOpen => Views.ThemeEditorWindow.IsOpen;
 
         // UTAU
         public List<string> DefaultRendererOptions { get; set; }
@@ -267,6 +307,7 @@ OnnxGpu = OnnxGpuOptions.Count > 0
             ShowPlaybackNoteBounce = Preferences.Default.ShowPlaybackNoteBounce;
             DetachPianoRoll = Preferences.Default.DetachPianoRoll;
             UseStudioUI = Preferences.Default.UseStudioUI;
+            InitPresets();
             WaveformStyle = Preferences.Default.WaveformStyle;
             WaveformLayout = Preferences.Default.WaveformLayout;
             WaveformFollowMode = Preferences.Default.WaveformFollowMode;
@@ -399,16 +440,39 @@ OnnxGpu = OnnxGpuOptions.Count > 0
             this.WhenAnyValue(vm => vm.UseStudioUI)
                 .Subscribe(enabled => {
                     Preferences.Default.UseStudioUI = enabled;
-                    if (StudioUI.EnsureClassicTheme() && ThemeName != Preferences.Default.ThemeName) {
+                    bool themeChanged = enabled
+                        ? StudioUI.EnsureStudioTheme()
+                        : StudioUI.EnsureClassicTheme();
+                    if (themeChanged && ThemeName != Preferences.Default.ThemeName) {
                         ThemeName = Preferences.Default.ThemeName;
                     }
                     Preferences.Save();
                     this.RaisePropertyChanged(nameof(ThemeItems));
+                    this.RaisePropertyChanged(nameof(ThemeSelectionEnabled));
                     App.SetTheme();
                     StudioUI.NotifyChanged();
                     MessageBus.Current.SendMessage(new WaveformRefreshEvent());
                     MessageBus.Current.SendMessage(new NotesRefreshEvent());
                 });
+            this.WhenAnyValue(vm => vm.SelectedPresetItem)
+                .Subscribe(display => {
+                    if (string.IsNullOrEmpty(display)) {
+                        return;
+                    }
+                    string name = display.EndsWith(" *", StringComparison.Ordinal)
+                        ? display[..^2]
+                        : display;
+                    // Never re-apply the currently selected preset: the dirty
+                    // marker ("*") also flows through this property and would
+                    // otherwise reset the very change the user just made.
+                    if (name == CurrentPreset) {
+                        return;
+                    }
+                    ApplyPreset(name);
+                });
+            // Any change to a preset-owned UI value marks the current preset as
+            // modified (shown as a trailing "*" in the preset list).
+            PropertyChanged += OnPresetPropertyChanged;
             this.WhenAnyValue(vm => vm.WaveformStyle)
                 .Subscribe(style => {
                     Preferences.Default.WaveformStyle = style;
@@ -812,6 +876,214 @@ OnnxGpu = OnnxGpuOptions.Count > 0
                 DocManager.Inst.ExecuteCmd(new ErrorMessageNotification("Failed to play test sound.", e));
             }
         }
+
+        void InitPresets() {
+            StudioPresetManager.EnsureDefaults();
+            CurrentPreset = string.IsNullOrEmpty(Preferences.Default.StudioPreset)
+                ? StudioThemeGenerator.StudioDark
+                : Preferences.Default.StudioPreset;
+            var preset = StudioPresetManager.Load(CurrentPreset);
+            if (preset == null) {
+                CurrentPreset = StudioThemeGenerator.StudioDark;
+                Preferences.Default.StudioPreset = CurrentPreset;
+                preset = StudioPresetManager.GetBuiltIn(CurrentPreset);
+            }
+            PresetDirty = !PresetMatches(preset);
+            RefreshPresetItems();
+        }
+
+        void RefreshPresetItems() {
+            var names = StudioPresetManager.LoadAll().Select(p => p.Name).ToList();
+            var items = names
+                .Select(name => name == CurrentPreset && PresetDirty ? name + " *" : name)
+                .ToList();
+            // Only replace the list when its content actually changed — replacing
+            // the ItemsSource instance on every refresh drops the ComboBox
+            // selection text even though the selection itself is unchanged.
+            if (!PresetItems.SequenceEqual(items)) {
+                PresetItems = items;
+                this.RaisePropertyChanged(nameof(PresetItems));
+            }
+            string display = CurrentPreset + (PresetDirty ? " *" : "");
+            if (SelectedPresetItem != display) {
+                SelectedPresetItem = display;
+            }
+        }
+
+        void MarkPresetDirty() {
+            if (_applyingPreset || PresetDirty) {
+                return;
+            }
+            PresetDirty = true;
+            RefreshPresetItems();
+        }
+
+        void OnPresetPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e) {
+            if (e.PropertyName != null && PresetUiPropertyNames.Contains(e.PropertyName)) {
+                MarkPresetDirty();
+            }
+        }
+
+        void ApplyPreset(string name) {
+            var preset = StudioPresetManager.Load(name)
+                         ?? StudioPresetManager.GetBuiltIn(name);
+            _applyingPreset = true;
+            try {
+                ApplyPresetUi(preset.Ui);
+                Preferences.Default.StudioPreset = name;
+                CurrentPreset = name;
+                Preferences.Save();
+                App.SetTheme();
+                StudioUI.NotifyChanged();
+            } finally {
+                _applyingPreset = false;
+            }
+            PresetDirty = false;
+            RefreshPresetItems();
+        }
+
+        void ApplyPresetUi(StudioPresetUi ui) {
+            static void ApplyInt(int? value, Action<int> set) {
+                if (value.HasValue) {
+                    set(value.Value);
+                }
+            }
+            static void ApplyBool(bool? value, Action<bool> set) {
+                if (value.HasValue) {
+                    set(value.Value);
+                }
+            }
+            static void ApplyString(string? value, Action<string> set) {
+                if (!string.IsNullOrEmpty(value)) {
+                    set(value);
+                }
+            }
+            ApplyInt(ui.WaveformStyle, v => WaveformStyle = v);
+            ApplyInt(ui.WaveformLayout, v => WaveformLayout = v);
+            ApplyInt(ui.WaveformFollowMode, v => WaveformFollowMode = v);
+            ApplyInt(ui.WaveformFadeInMs, v => WaveformFadeInMs = v);
+            ApplyInt(ui.WaveformFadeOutMs, v => WaveformFadeOutMs = v);
+            ApplyInt(ui.WaveformColorMode, v => WaveformColorMode = v);
+            ApplyString(ui.WaveformColorHex, v => WaveformColorHex = v);
+            ApplyBool(ui.WaveformColorInvert, v => WaveformColorInvert = v);
+            ApplyInt(ui.WaveformScalePercent, v => WaveformScalePercent = v);
+            ApplyInt(ui.WaveformFixedBottomPx, v => WaveformFixedBottomPx = v);
+            ApplyInt(ui.NoteStrokeColorMode, v => NoteStrokeColorMode = v);
+            ApplyString(ui.NoteStrokeColorHex, v => NoteStrokeColorHex = v);
+            ApplyBool(ui.NoteStrokeColorInvert, v => NoteStrokeColorInvert = v);
+            ApplyInt(ui.NoteStrokeThickness, v => NoteStrokeThickness = v);
+            ApplyInt(ui.PitchPredictionColorMode, v => PitchPredictionColorMode = v);
+            ApplyString(ui.PitchPredictionColorHex, v => PitchPredictionColorHex = v);
+            ApplyBool(ui.PitchPredictionColorInvert, v => PitchPredictionColorInvert = v);
+            ApplyInt(ui.PitchPredictionThickness, v => PitchPredictionThickness = v);
+            ApplyBool(ui.NoteRoundedCorners, v => NoteRoundedCorners = v);
+            ApplyInt(ui.NoteCornerRadiusPx, v => NoteCornerRadiusPx = v);
+            ApplyBool(ui.NoteSolidFill, v => NoteSolidFill = v);
+            ApplyInt(ui.NoteLyricVAlign, v => NoteLyricVAlign = v);
+            ApplyInt(ui.NoteLyricHAlign, v => NoteLyricHAlign = v);
+            ApplyString(ui.NoteLyricFontFamily, v => NoteLyricFontFamily = v);
+            ApplyInt(ui.NoteLyricScalePercent, v => NoteLyricScalePercent = v);
+            ApplyInt(ui.NoteLyricWeight, v => NoteLyricWeight = v);
+            ApplyBool(ui.NoteLyricItalic, v => NoteLyricItalic = v);
+            ApplyInt(ui.NoteLyricColorMode, v => NoteLyricColorMode = v);
+            ApplyString(ui.NoteLyricColorHex, v => NoteLyricColorHex = v);
+            ApplyBool(ui.NoteLyricColorInvert, v => NoteLyricColorInvert = v);
+        }
+
+        bool PresetMatches(StudioPreset preset) {
+            var ui = preset.Ui;
+            return Match(ui.WaveformStyle, Preferences.Default.WaveformStyle)
+                && Match(ui.WaveformLayout, Preferences.Default.WaveformLayout)
+                && Match(ui.WaveformFollowMode, Preferences.Default.WaveformFollowMode)
+                && Match(ui.WaveformFadeInMs, Preferences.Default.WaveformFadeInMs)
+                && Match(ui.WaveformFadeOutMs, Preferences.Default.WaveformFadeOutMs)
+                && Match(ui.WaveformColorMode, Preferences.Default.WaveformColorMode)
+                && Match(ui.WaveformColorHex, Preferences.Default.WaveformColorHex)
+                && Match(ui.WaveformColorInvert, Preferences.Default.WaveformColorInvert)
+                && Match(ui.WaveformScalePercent, Preferences.Default.WaveformScalePercent)
+                && Match(ui.WaveformFixedBottomPx, Preferences.Default.WaveformFixedBottomPx)
+                && Match(ui.NoteStrokeColorMode, Preferences.Default.NoteStrokeColorMode)
+                && Match(ui.NoteStrokeColorHex, Preferences.Default.NoteStrokeColorHex)
+                && Match(ui.NoteStrokeColorInvert, Preferences.Default.NoteStrokeColorInvert)
+                && Match(ui.NoteStrokeThickness, Preferences.Default.NoteStrokeThickness)
+                && Match(ui.PitchPredictionColorMode, Preferences.Default.PitchPredictionColorMode)
+                && Match(ui.PitchPredictionColorHex, Preferences.Default.PitchPredictionColorHex)
+                && Match(ui.PitchPredictionColorInvert, Preferences.Default.PitchPredictionColorInvert)
+                && Match(ui.PitchPredictionThickness, Preferences.Default.PitchPredictionThickness)
+                && Match(ui.NoteRoundedCorners, Preferences.Default.NoteRoundedCorners)
+                && Match(ui.NoteCornerRadiusPx, Preferences.Default.NoteCornerRadiusPx)
+                && Match(ui.NoteSolidFill, Preferences.Default.NoteSolidFill)
+                && Match(ui.NoteLyricVAlign, Preferences.Default.NoteLyricVAlign)
+                && Match(ui.NoteLyricHAlign, Preferences.Default.NoteLyricHAlign)
+                && Match(ui.NoteLyricFontFamily, Preferences.Default.NoteLyricFontFamily)
+                && Match(ui.NoteLyricScalePercent, Preferences.Default.NoteLyricScalePercent)
+                && Match(ui.NoteLyricWeight, Preferences.Default.NoteLyricWeight)
+                && Match(ui.NoteLyricItalic, Preferences.Default.NoteLyricItalic)
+                && Match(ui.NoteLyricColorMode, Preferences.Default.NoteLyricColorMode)
+                && Match(ui.NoteLyricColorHex, Preferences.Default.NoteLyricColorHex)
+                && Match(ui.NoteLyricColorInvert, Preferences.Default.NoteLyricColorInvert);
+        }
+
+        /// <summary>
+        /// Saves the current Studio UI appearance values under <paramref name="name"/>
+        /// into <c>DataPath/Presets</c> as a YAML preset.
+        /// </summary>
+        public void SavePreset(string name) {
+            if (string.IsNullOrWhiteSpace(name)) {
+                return;
+            }
+            var current = StudioPresetManager.Load(CurrentPreset)
+                          ?? StudioPresetManager.GetBuiltIn(CurrentPreset);
+            var preset = new StudioPreset {
+                Name = name,
+                IsDark = current.IsDark,
+                Palette = new Dictionary<string, string>(current.Palette),
+                Ui = CaptureUi(),
+            };
+            StudioPresetManager.Save(preset);
+            Preferences.Default.StudioPreset = name;
+            CurrentPreset = name;
+            PresetDirty = false;
+            Preferences.Save();
+            RefreshPresetItems();
+        }
+
+        StudioPresetUi CaptureUi() => new() {
+            WaveformStyle = Preferences.Default.WaveformStyle,
+            WaveformLayout = Preferences.Default.WaveformLayout,
+            WaveformFollowMode = Preferences.Default.WaveformFollowMode,
+            WaveformFadeInMs = Preferences.Default.WaveformFadeInMs,
+            WaveformFadeOutMs = Preferences.Default.WaveformFadeOutMs,
+            WaveformColorMode = Preferences.Default.WaveformColorMode,
+            WaveformColorHex = Preferences.Default.WaveformColorHex,
+            WaveformColorInvert = Preferences.Default.WaveformColorInvert,
+            WaveformScalePercent = Preferences.Default.WaveformScalePercent,
+            WaveformFixedBottomPx = Preferences.Default.WaveformFixedBottomPx,
+            NoteStrokeColorMode = Preferences.Default.NoteStrokeColorMode,
+            NoteStrokeColorHex = Preferences.Default.NoteStrokeColorHex,
+            NoteStrokeColorInvert = Preferences.Default.NoteStrokeColorInvert,
+            NoteStrokeThickness = Preferences.Default.NoteStrokeThickness,
+            PitchPredictionColorMode = Preferences.Default.PitchPredictionColorMode,
+            PitchPredictionColorHex = Preferences.Default.PitchPredictionColorHex,
+            PitchPredictionColorInvert = Preferences.Default.PitchPredictionColorInvert,
+            PitchPredictionThickness = Preferences.Default.PitchPredictionThickness,
+            NoteRoundedCorners = Preferences.Default.NoteRoundedCorners,
+            NoteCornerRadiusPx = Preferences.Default.NoteCornerRadiusPx,
+            NoteSolidFill = Preferences.Default.NoteSolidFill,
+            NoteLyricVAlign = Preferences.Default.NoteLyricVAlign,
+            NoteLyricHAlign = Preferences.Default.NoteLyricHAlign,
+            NoteLyricFontFamily = Preferences.Default.NoteLyricFontFamily,
+            NoteLyricScalePercent = Preferences.Default.NoteLyricScalePercent,
+            NoteLyricWeight = Preferences.Default.NoteLyricWeight,
+            NoteLyricItalic = Preferences.Default.NoteLyricItalic,
+            NoteLyricColorMode = Preferences.Default.NoteLyricColorMode,
+            NoteLyricColorHex = Preferences.Default.NoteLyricColorHex,
+            NoteLyricColorInvert = Preferences.Default.NoteLyricColorInvert,
+        };
+
+        static bool Match(int? a, int b) => !a.HasValue || a.Value == b;
+        static bool Match(bool? a, bool b) => !a.HasValue || a.Value == b;
+        static bool Match(string? a, string b) => string.IsNullOrEmpty(a) || a == b;
 
         public void OpenResamplerLocation() {
             try {

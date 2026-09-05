@@ -7,8 +7,8 @@
       <ComboBoxItem Content="{DynamicResource prefs.appearance.color.theme}"/>
       <ComboBoxItem Content="{DynamicResource prefs.appearance.color.accent}"/>
       <ComboBoxItem Content="{DynamicResource prefs.appearance.color.gray}"/>
-      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.light}"/>
-      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.dark}"/>
+      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.text}"/>
+      <ComboBoxItem Content="{DynamicResource prefs.appearance.color.emphasis}"/>
       <ComboBoxItem Content="{DynamicResource prefs.appearance.color.rgb}"/>
     </ComboBox>
     <TextBox Grid.Column="2"

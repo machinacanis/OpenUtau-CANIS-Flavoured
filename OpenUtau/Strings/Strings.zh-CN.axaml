@@ -598,11 +598,11 @@
   <system:String x:Key="prefs.advanced.winepath">Wine 路径（设置以启用 Wine 获得兼容性）</system:String>
   <system:String x:Key="prefs.appearance">外观</system:String>
   <system:String x:Key="prefs.appearance.color.accent">强调色</system:String>
-  <system:String x:Key="prefs.appearance.color.dark">暗色文本</system:String>
+  <system:String x:Key="prefs.appearance.color.emphasis">强调文本</system:String>
   <system:String x:Key="prefs.appearance.color.gray">灰色</system:String>
   <system:String x:Key="prefs.appearance.color.invert">反色</system:String>
-  <system:String x:Key="prefs.appearance.color.light">亮色文本</system:String>
   <!--<system:String x:Key="prefs.appearance.color.rgb">RGB</system:String>-->
+  <system:String x:Key="prefs.appearance.color.text">文本</system:String>
   <system:String x:Key="prefs.appearance.color.theme">主题色</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.empty">主题名称不能为空。</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.prompt">输入主题名称</system:String>
@@ -757,6 +757,13 @@
   </system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">最大渲染线程数</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
+  <!--<system:String x:Key="prefs.studioui">Studio UI</system:String>-->
+  <system:String x:Key="prefs.studioui.disabled.hint">请先在“外观”中启用 Studio UI，再在此配置 Studio UI 设置。</system:String>
+  <system:String x:Key="prefs.studioui.preset">预设</system:String>
+  <system:String x:Key="prefs.studioui.save">保存预设</system:String>
+  <system:String x:Key="prefs.studioui.save.empty">预设名称不能为空。</system:String>
+  <system:String x:Key="prefs.studioui.save.prompt">预设名称</system:String>
+  <system:String x:Key="prefs.studioui.save.title">保存 Studio UI 预设</system:String>
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->
 
   <system:String x:Key="progress.cachecleared">缓存已清除</system:String>
