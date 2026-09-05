@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -148,6 +148,23 @@ namespace OpenUtau.App.Views {
                 File.WriteAllText(Path.Join(PathManager.Inst.ThemesPath, filename),
                     Yaml.DefaultSerializer.Serialize(themeYaml));
                 viewModel!.RefreshThemes();
+            };
+            dialog.ShowDialog(this);
+        }
+
+        void OnSavePreset(object sender, RoutedEventArgs e) {
+            var dialog = new TypeInDialog {
+                Title = ThemeManager.GetString("prefs.studioui.save.title")
+            };
+            dialog.SetPrompt(ThemeManager.GetString("prefs.studioui.save.prompt"));
+            dialog.onFinish = s => {
+                if (string.IsNullOrEmpty(s)) {
+                    MessageBox.ShowModal(this,
+                        ThemeManager.GetString("prefs.studioui.save.empty"),
+                        ThemeManager.GetString("prefs.studioui.save.title"));
+                    return;
+                }
+                viewModel!.SavePreset(s.Trim());
             };
             dialog.ShowDialog(this);
         }

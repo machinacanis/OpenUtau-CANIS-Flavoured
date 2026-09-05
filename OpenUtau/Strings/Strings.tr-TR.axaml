@@ -599,11 +599,11 @@ Uyarı: Bu seçenek özel önayarları kaldırır.</system:String>
   <system:String x:Key="prefs.advanced.winepath">Wine Yolu (uyumluluk için wine'ı etkinleştirmek amacıyla ayarlayın)</system:String>
   <system:String x:Key="prefs.appearance">Görünüm</system:String>
   <!--<system:String x:Key="prefs.appearance.color.accent">Accent</system:String>-->
-  <!--<system:String x:Key="prefs.appearance.color.dark">Dark text</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.emphasis">Emphasis text</system:String>-->
   <!--<system:String x:Key="prefs.appearance.color.gray">Gray</system:String>-->
   <!--<system:String x:Key="prefs.appearance.color.invert">Invert</system:String>-->
-  <!--<system:String x:Key="prefs.appearance.color.light">Light text</system:String>-->
   <!--<system:String x:Key="prefs.appearance.color.rgb">RGB</system:String>-->
+  <!--<system:String x:Key="prefs.appearance.color.text">Text</system:String>-->
   <!--<system:String x:Key="prefs.appearance.color.theme">Theme</system:String>-->
   <system:String x:Key="prefs.appearance.customtheme.create.empty">Tema adı boş olamaz.</system:String>
   <system:String x:Key="prefs.appearance.customtheme.create.prompt">Tema Adını Girin</system:String>
@@ -752,6 +752,13 @@ HN-SEP model: {3} ({4})</system:String>-->
   <system:String x:Key="prefs.rendering.threads.cpuwarn">Uyarı: çok fazla render iş parçacığı OpenUtau'nun yavaş çalışmasına neden olabilir.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Maksimum Render İş Parçacığı</system:String>
   <!--<system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>-->
+  <!--<system:String x:Key="prefs.studioui">Studio UI</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.disabled.hint">Enable Studio UI in Appearance to configure Studio UI settings.</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.preset">Preset</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.save">Save preset</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.save.empty">Preset name cannot be empty.</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.save.prompt">Preset name</system:String>-->
+  <!--<system:String x:Key="prefs.studioui.save.title">Save Studio UI preset</system:String>-->
   <!--<system:String x:Key="prefs.utau">UTAU</system:String>-->
 
   <system:String x:Key="progress.cachecleared">Önbellek temizlendi.</system:String>

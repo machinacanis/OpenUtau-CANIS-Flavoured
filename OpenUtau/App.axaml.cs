@@ -107,11 +107,13 @@ namespace OpenUtau.App {
                 return;
             }
             StudioUI.EnsureClassicTheme();
+            if (StudioUI.IsEnabled) {
+                StudioUI.EnsureStudioTheme();
+            }
             var light = (IResourceDictionary) Current.Resources["themes-light"]!;
             var dark = (IResourceDictionary) Current.Resources["themes-dark"]!;
             var custom = (IResourceDictionary) Current.Resources["themes-custom"]!;
             var warmSage = (IResourceDictionary) Current.Resources["themes-warmsage"]!;
-            var studio = (IResourceDictionary) Current.Resources["themes-studio"]!;
             switch (Core.Util.Preferences.Default.ThemeName) {
                 case "Light":
                     ApplyTheme(light);
@@ -125,10 +127,13 @@ namespace OpenUtau.App {
                     ApplyTheme(warmSage);
                     Current.RequestedThemeVariant = ThemeVariant.Dark;
                     break;
-                case "Studio":
-                    ApplyTheme(studio);
-                    Current.RequestedThemeVariant = ThemeVariant.Dark;
+                case "Studio": {
+                    var preset = StudioPresetManager.Load(Core.Util.Preferences.Default.StudioPreset)
+                                 ?? StudioPresetManager.GetBuiltIn(StudioThemeGenerator.StudioDark);
+                    ApplyTheme(StudioPresetManager.BuildResourceDictionary(preset));
+                    Current.RequestedThemeVariant = preset.IsDark ? ThemeVariant.Dark : ThemeVariant.Light;
                     break;
+                }
                 default:
                     ApplyTheme(custom);
                     CustomTheme.ApplyTheme(Core.Util.Preferences.Default.ThemeName);

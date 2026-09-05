@@ -13,21 +13,37 @@ namespace OpenUtau.App.Studio {
 
     public static class StudioUI {
         public const string StudioTheme = "Studio";
+        // Legacy: WarmSage was a Studio-only palette before palettes became
+        // auto-generated presets inside the single Studio theme.
         public const string WarmSageTheme = "WarmSage";
 
         public static readonly string[] ClassicThemes = ["Light", "Dark"];
-        public static readonly string[] ExtraThemes = [WarmSageTheme, StudioTheme];
 
         public static bool IsEnabled => Preferences.Default.UseStudioUI;
 
         public static bool IsStudioTheme(string? themeName) =>
             themeName == StudioTheme || themeName == WarmSageTheme;
 
-        public static string[] BuiltInThemes =>
-            IsEnabled ? [..ClassicThemes, ..ExtraThemes] : ClassicThemes;
+        /// <summary>
+        /// Studio palettes are configured inside the Studio UI page, so they
+        /// never appear in the general Appearance theme list.
+        /// </summary>
+        public static string[] BuiltInThemes => ClassicThemes;
 
         public static bool IsBuiltIn(string themeName) =>
-            ClassicThemes.Contains(themeName) || ExtraThemes.Contains(themeName);
+            ClassicThemes.Contains(themeName) || IsStudioTheme(themeName);
+
+        /// <summary>
+        /// When the user turns Studio UI on, the whole app is covered by the
+        /// auto-generated Studio palette regardless of the classic theme name.
+        /// </summary>
+        public static bool EnsureStudioTheme() {
+            if (!IsEnabled || Preferences.Default.ThemeName == StudioTheme) {
+                return false;
+            }
+            Preferences.Default.ThemeName = StudioTheme;
+            return true;
+        }
 
         /// <summary>
         /// Drop Studio-only palettes when the user turns Studio UI off.

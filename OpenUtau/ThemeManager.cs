@@ -220,13 +220,25 @@ namespace OpenUtau.App {
                 ? Math.Max(0, Preferences.Default.NoteCornerRadiusPx)
                 : 0;
 
-            ResolvePalette(
-                Preferences.Default.PitchPredictionColorMode,
-                Preferences.Default.PitchPredictionColorHex,
-                Preferences.Default.PitchPredictionColorInvert,
-                out var pitch, out _);
-            FinalPitchBrush = pitch;
-            FinalPitchPen = new Pen(pitch, Math.Max(0, Preferences.Default.PitchPredictionThickness));
+            if (Preferences.Default.PitchPredictionColorMode == 0) {
+                // Theme mode: always emit a bright, prominent pitch line. The
+                // complementary hue of the accent (not a bitwise invert) keeps
+                // it vivid — e.g. orange against blue notes/waveform — in every
+                // palette. The legacy invert flag is ignored here so the default
+                // stays conspicuous; it still applies to the explicit modes.
+                FinalPitchBrush = new SolidColorBrush(
+                    StudioThemeGenerator.ProminentComplementary(
+                        SolidColor(AccentBrush1, Color.FromRgb(0x00, 0xB8, 0xFF)),
+                        IsDarkMode));
+            } else {
+                ResolvePalette(
+                    Preferences.Default.PitchPredictionColorMode,
+                    Preferences.Default.PitchPredictionColorHex,
+                    Preferences.Default.PitchPredictionColorInvert,
+                    out var pitch, out _);
+                FinalPitchBrush = pitch;
+            }
+            FinalPitchPen = new Pen(FinalPitchBrush, Math.Max(0, Preferences.Default.PitchPredictionThickness));
 
             ResolvePalette(
                 Preferences.Default.WaveformColorMode,
@@ -275,11 +287,11 @@ namespace OpenUtau.App {
                     normal = NeutralAccentBrush;
                     selected = ForegroundBrush;
                     break;
-                case 3: // light text
-                    normal = selected = LightTextBrush;
+                case 3: // text
+                    normal = selected = TextBrush;
                     break;
-                case 4: // dark text
-                    normal = selected = DarkTextBrush;
+                case 4: // emphasis text
+                    normal = selected = EmphasisTextBrush;
                     break;
                 case 5: // rgb hex
                     var rgb = new SolidColorBrush(ParseHexColor(hex, Color.FromRgb(0x4E, 0xA6, 0xEA)));
@@ -296,8 +308,22 @@ namespace OpenUtau.App {
             }
         }
 
-        static IBrush LightTextBrush => IsDarkMode ? ForegroundBrush : BackgroundBrush;
-        static IBrush DarkTextBrush => IsDarkMode ? BackgroundBrush : ForegroundBrush;
+        /// <summary>
+        /// Text color: the theme foreground. Automatically light in dark
+        /// palettes and dark in light palettes (the palette decides, inversion
+        /// is only needed when the user manually toggles Invert).
+        /// </summary>
+        static IBrush TextBrush => ForegroundBrush;
+        /// <summary>
+        /// Emphasis text color: a web-style highlight color (bright blue by
+        /// default). The dark palette uses the bright variant, the light
+        /// palette automatically switches to the darker blue so emphasized
+        /// text stays readable — light/dark is decided by inversion of the
+        /// palette, like link/highlight colors on the web.
+        /// </summary>
+        static readonly IBrush EmphasisDarkBrush = new SolidColorBrush(Color.FromRgb(0x4F, 0xC3, 0xF7));
+        static readonly IBrush EmphasisLightBrush = new SolidColorBrush(Color.FromRgb(0x1E, 0x88, 0xE5));
+        static IBrush EmphasisTextBrush => IsDarkMode ? EmphasisDarkBrush : EmphasisLightBrush;
 
         static IBrush InvertBrush(IBrush brush) {
             var c = SolidColor(brush, Color.FromRgb(255, 255, 255));
