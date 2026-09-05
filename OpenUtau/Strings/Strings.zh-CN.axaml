@@ -191,6 +191,7 @@
   <system:String x:Key="errors.failed.openfile">打开失败</system:String>
   <system:String x:Key="errors.failed.openlocation">打开位置失败</system:String>
   <system:String x:Key="errors.failed.opennewerproject">项目版本高于软件！请升级 OpenUtau！</system:String>
+  <!--<system:String x:Key="errors.failed.prerender">Failed to render in the background.</system:String>-->
   <system:String x:Key="errors.failed.render">渲染失败</system:String>
   <system:String x:Key="errors.failed.runeditingmacro">编辑宏失败</system:String>
   <system:String x:Key="errors.failed.save">保存失败</system:String>
@@ -206,6 +207,7 @@
   <system:String x:Key="errors.lyrics.regex">正则表达式包含不支持的字符</system:String>
   <system:String x:Key="errors.lyrics.regexpreview">- 正则表达式错误 -</system:String>
   <system:String x:Key="errors.resampler.failed.message">重采样器未能创建输出文件。此类错误通常由 oto.ini 配置问题引起。建议生成歌手错误报告以检查此类问题。</system:String>
+  <!--<system:String x:Key="errors.toast.details">(Click here for details)</system:String>-->
 
   <system:String x:Key="exesetup.installing">正在安装 "{0}"...</system:String>
   <system:String x:Key="exesetup.linux">在 Linux 上使用 exe 格式的重采样器或 wavtool：
@@ -471,6 +473,7 @@
   <system:String x:Key="pianoroll.menu.batch.running">正在运行批处理</system:String>
   <system:String x:Key="pianoroll.menu.external">外部</system:String>
   <system:String x:Key="pianoroll.menu.lyrics">歌词</system:String>
+  <!--<system:String x:Key="pianoroll.menu.lyrics.addphonetichints">Add Phonetic Hint</system:String>-->
   <system:String x:Key="pianoroll.menu.lyrics.dashtoplus">将 "-" 替换为 "+"</system:String>
   <system:String x:Key="pianoroll.menu.lyrics.dashtoplustilda">将 "-" 替换为 "+~"</system:String>
   <system:String x:Key="pianoroll.menu.lyrics.edit">编辑歌词</system:String>
@@ -530,6 +533,8 @@
   <system:String x:Key="pianoroll.toggle.expressions">显示表情 (L)</system:String>
   <system:String x:Key="pianoroll.toggle.finalpitch">显示最终音高线 (R)</system:String>
   <system:String x:Key="pianoroll.toggle.hidepianoroll">隐藏钢琴卷帘</system:String>
+  <!--<system:String x:Key="pianoroll.toggle.livepitch.fast">Live Pitch (Fast): auto-regenerate DiffSinger pitch after edits (fastest)</system:String>-->
+  <!--<system:String x:Key="pianoroll.toggle.livepitch.normal">Live Pitch (Normal): auto-regenerate DiffSinger pitch after edits</system:String>-->
   <system:String x:Key="pianoroll.toggle.noteparams">显示参数面板 (\)</system:String>
   <system:String x:Key="pianoroll.toggle.overwritepitch">切换覆盖音高模式</system:String>
   <system:String x:Key="pianoroll.toggle.phoneme">显示音素 (O)</system:String>

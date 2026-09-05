@@ -211,7 +211,7 @@ namespace OpenUtau.App.Controls {
 
                         if (snapProgress < 1.0) needsAnotherFrame = true;
 
-                        int drawWidth = Math.Min((int)Bounds.Width, bitmap.PixelSize.Width);
+int drawWidth = Math.Min((int)Bounds.Width, bitmap.PixelSize.Width);
                         int drawHeight = Math.Min((int)Bounds.Height, bitmap.PixelSize.Height);
                         if (colMin.Length < drawWidth) {
                             Array.Resize(ref colMin, drawWidth);
@@ -220,12 +220,42 @@ namespace OpenUtau.App.Controls {
                         Array.Clear(colMin, 0, drawWidth);
                         Array.Clear(colMax, 0, drawWidth);
 
+                        // Phrase audio ranges as [startMs, endMs] pairs, matching
+                        // the WaveSource layout of the mix, so that time ranges
+                        // without any phrase are left blank instead of drawing a
+                        // zero-volume line. Silence inside a phrase still draws.
+                        double[]? phraseRanges = null;
+                        if (part.renderPhrases.Count > 0) {
+                            phraseRanges = new double[part.renderPhrases.Count * 2];
+                            for (int p = 0; p < part.renderPhrases.Count; ++p) {
+                                (double rangeStartMs, double rangeEndMs) = part.renderPhrases[p].AudioRange;
+                                phraseRanges[p * 2] = rangeStartMs;
+                                phraseRanges[p * 2 + 1] = rangeEndMs;
+                            }
+                        }
+
                         int startSample = 0;
+                        double columnStartMs = leftMs;
                         for (int i = 0; i < drawWidth; ++i) {
                             double endTick = viewModel.TickOrigin + viewModel.TickOffset + (i + 1.0) / viewModel.TickWidth;
                             double endMs = project.timeAxis.TickPosToMsPos(endTick);
                             int endSample = Math.Clamp((int)((endMs - leftMs) * 44100 / 1000) * 2, 0, sampleCount);
 
+// Skip drawing where no phrase has audio.
+                            bool covered = false;
+                            if (phraseRanges != null) {
+                                for (int p = 0; p < phraseRanges.Length; p += 2) {
+                                    if (phraseRanges[p + 1] > columnStartMs && phraseRanges[p] < endMs) {
+                                        covered = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!covered) {
+                                startSample = endSample;
+                                columnStartMs = endMs;
+                                continue;
+                            }
                             if (endSample > startSample) {
                                 float rawMin = float.MaxValue;
                                 float rawMax = float.MinValue;
@@ -240,6 +270,7 @@ namespace OpenUtau.App.Controls {
                                 colMax[i] = rawMax * snapEase;
                             }
                             startSample = endSample;
+                            columnStartMs = endMs;
                         }
 
                         int layout = Preferences.Default.WaveformLayout;
