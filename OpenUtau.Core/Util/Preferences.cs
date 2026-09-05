@@ -213,10 +213,11 @@ namespace OpenUtau.Core.Util {
             public bool ShowPlaybackNoteHighlight = true;
             public bool ShowPlaybackNoteBounce = false;
             /// <summary>
-            /// Opt-in Studio UI chrome, piano-roll appearance, and Studio-only
-            /// editor layout. Classic editing is unchanged while this is false.
+            /// Studio UI chrome, piano-roll appearance, and Studio-only editor
+            /// layout. Enabled by default; classic editing is unchanged while
+            /// this is false.
             /// </summary>
-            public bool UseStudioUI = false;
+            public bool UseStudioUI = true;
             /// <summary>
             /// Active Studio UI preset name. Presets are YAML files in
             /// <c>DataPath/Presets</c>; switching one overwrites the Studio UI
